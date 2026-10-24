@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #0A0A0A; color: #F5F5F5; font-family: Poppins, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #F5F5F5; text-decoration: none; }
+  a:hover { color: #F10600; }
+  input, textarea, select, button { font-family: inherit; }
+  ::selection { background: #F10600; color: #fff; }
+  @keyframes ramPulse { 0%,100% { opacity: .35; } 50% { opacity: .7; } }
+  @keyframes ramDrift { 0% { transform: translateY(0); } 100% { transform: translateY(-14px); } }
+</style>
+</helmet>
+
+<div style="background:#0A0A0A;overflow-x:hidden">
+
+  <header id="ram-header" style="position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px;background:linear-gradient(180deg,rgba(10,10,10,.92),rgba(10,10,10,0));backdrop-filter:blur(2px);transition:background .35s ease,padding .35s ease,border-color .35s ease;border-bottom:1px solid rgba(191,195,199,0)">
+    <a href="#inicio" onClick="{{ goInicio }}" style="display:flex;align-items:center;gap:12px;flex:0 0 auto">
+      <img src="uploads/Logotipo%20RAM%20de%20artes%20marciales.png" alt="RAM Martial Arts" style="height:48px;width:auto;mix-blend-mode:screen;display:block" />
+    </a>
+    <nav style="display:flex;align-items:center;gap:clamp(10px,1.4vw,20px);flex-wrap:nowrap;justify-content:flex-end;min-width:0">
+      <a href="#inicio" onClick="{{ goInicio }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Inicio</a>
+      <a href="#nosotros" onClick="{{ goNosotros }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Nosotros</a>
+      <a href="#disciplinas" onClick="{{ goDisciplinas }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Disciplinas</a>
+      <a href="#horarios" onClick="{{ goHorarios }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Horarios</a>
+      <a href="#galeria" onClick="{{ goGaleria }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Galería</a>
+      <a href="#instructores" onClick="{{ goInstructores }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Instructores</a>
+      <a href="#contacto" onClick="{{ goContacto }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Contacto</a>
+      <a href="#contacto" onClick="{{ goContacto }}" style="padding:10px 16px;background:#F10600;color:#fff;font-size:clamp(10px,.8vw,11px);letter-spacing:.12em;text-transform:uppercase;font-weight:700;white-space:nowrap;clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%)" style-hover="background:#A30000;color:#fff">Agendar clase</a>
+    </nav>
+  </header>
+
+  <sc-if value="{{ pInicio }}" hint-placeholder-val="{{ true }}">
+  <section id="inicio" data-screen-label="Hero" style="position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:150px 0 0;overflow:hidden;background:#0A0A0A">
+    <div style="position:absolute;inset:0;background-image:url('uploads/_MG_7132%20(1).JPG.jpeg');background-size:cover;background-position:60% 40%;filter:grayscale(.35) contrast(1.08) brightness(.5)"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,10,.9) 0%,rgba(10,10,10,.6) 45%,rgba(10,10,10,.25) 100%)"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(180deg,rgba(10,10,10,0),rgba(10,10,10,.85))"></div>
+
+    <div style="position:relative;width:100%;max-width:1320px;margin:0 auto;padding:0 28px clamp(56px,7vw,96px);flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div data-reveal style="opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease;max-width:800px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:26px">
+          <span style="display:block;width:56px;height:3px;background:#F10600"></span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#BFC3C7">Asunción · Paraguay</span>
+        </div>
+        <h1 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(40px,5.4vw,84px);line-height:.94;letter-spacing:-.03em;text-transform:uppercase;text-wrap:balance">
+          Formamos disciplina.<br /><span style="color:#F10600">Construimos</span> guerreros.
+        </h1>
+        <p style="margin:28px 0 0;max-width:48ch;font-size:clamp(16px,1.3vw,19px);line-height:1.6;color:#E3E5E7">
+          Academia de Brazilian Jiu-Jitsu y artes marciales enfocada en técnica real, constancia y evolución personal. Entrená con método, entre gente que te empuja a mejorar.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:38px">
+          <a href="#contacto" onClick="{{ goContacto }}" style="padding:18px 34px;background:#F10600;color:#fff;font-weight:700;font-size:14px;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)" style-hover="background:#A30000;color:#fff">Agendar clase</a>
+          <a href="#disciplinas" onClick="{{ goDisciplinas }}" style="padding:18px 34px;border:1px solid rgba(245,245,245,.5);color:#F5F5F5;font-weight:700;font-size:14px;letter-spacing:.16em;text-transform:uppercase" style-hover="border-color:#F5F5F5;background:rgba(245,245,245,.08);color:#F5F5F5">Ver disciplinas</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;background:rgba(10,10,10,.72);border-top:1px solid rgba(245,245,245,.14)">
+      <div style="max-width:1320px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))">
+        <div style="padding:22px 8px;display:flex;align-items:center;justify-content:center">
+          <div style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(13px,1.1vw,17px);text-transform:uppercase;letter-spacing:-.01em;text-align:center">Brazilian Jiu-Jitsu</div>
+        </div>
+        <div style="padding:22px 8px;border-left:1px solid rgba(245,245,245,.14);display:flex;align-items:center;justify-content:center">
+          <div style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(13px,1.1vw,17px);text-transform:uppercase;letter-spacing:-.01em;text-align:center">Artes marciales</div>
+        </div>
+        <div style="padding:22px 8px;border-left:1px solid rgba(245,245,245,.14);display:flex;align-items:center;justify-content:center">
+          <div style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(13px,1.1vw,17px);text-transform:uppercase;letter-spacing:-.01em;text-align:center">Entrenamiento guiado</div>
+        </div>
+        <div style="padding:22px 8px;border-left:1px solid rgba(245,245,245,.14);display:flex;align-items:center;justify-content:center">
+          <div style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(13px,1.1vw,17px);text-transform:uppercase;letter-spacing:-.01em;text-align:center">Comunidad</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pNosotros }}" hint-placeholder-val="{{ true }}">
+  <section id="nosotros" data-screen-label="Sobre RAM" style="position:relative;padding:clamp(80px,9vw,140px) 28px;background:#0A0A0A">
+    <div style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:clamp(32px,5vw,80px);align-items:center">
+      <div data-reveal style="opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease;position:relative">
+        <img src="uploads/_MG_7018.JPG.jpeg" alt="Equipo RAM Martial Arts" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
+        <div style="position:absolute;right:-16px;bottom:-16px;width:58%;background:#F10600;padding:20px 22px">
+          <div style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(16px,1.6vw,22px);line-height:1.1;text-transform:uppercase;color:#fff">Técnica antes que fuerza</div>
+        </div>
+      </div>
+      <div data-reveal style="opacity:0;transform:translateY(28px);transition:opacity .9s .1s ease,transform .9s .1s ease">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Sobre RAM</span>
+        <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Más que una academia,<br />una mentalidad.</h2>
+        <p style="margin:24px 0 0;font-size:17px;line-height:1.7;color:#BFC3C7;max-width:54ch">RAM Martial Arts nació con una idea simple: enseñar artes marciales de verdad, con método, seguridad y acompañamiento real. Cada clase tiene estructura — calentamiento, técnica, drills y práctica — para que progreses sin importar desde dónde arranques.</p>
+        <p style="margin:16px 0 0;font-size:17px;line-height:1.7;color:#BFC3C7;max-width:54ch">Trabajamos con niños, adolescentes y adultos. Desde el primer día estás en el tatami, con instructores que corrigen y compañeros que cuidan.</p>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin-top:40px;background:rgba(191,195,199,.16)">
+          <div style="background:#0A0A0A;padding:22px 20px"><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.02em">Disciplina</div><div style="margin-top:8px;font-size:14px;color:#BFC3C7;line-height:1.55">Presentarse, aunque no haya ganas. Ahí empieza todo.</div></div>
+          <div style="background:#0A0A0A;padding:22px 20px"><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.02em">Respeto</div><div style="margin-top:8px;font-size:14px;color:#BFC3C7;line-height:1.55">Al compañero, al profesor y al proceso de cada uno.</div></div>
+          <div style="background:#0A0A0A;padding:22px 20px"><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.02em">Constancia</div><div style="margin-top:8px;font-size:14px;color:#BFC3C7;line-height:1.55">El progreso se construye clase por clase, no en una semana.</div></div>
+          <div style="background:#0A0A0A;padding:22px 20px"><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.02em">Superación</div><div style="margin-top:8px;font-size:14px;color:#BFC3C7;line-height:1.55">Competir con quien fuiste ayer, no con el de al lado.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pDisciplinas }}" hint-placeholder-val="{{ true }}">
+  <section id="disciplinas" data-screen-label="Disciplinas" style="padding:clamp(80px,9vw,140px) 28px;background:#121212">
+    <div style="max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:clamp(32px,4vw,56px)">
+        <div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Disciplinas</span>
+          <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Elegí tu camino</h2>
+        </div>
+        <p style="margin:0;max-width:40ch;font-size:16px;line-height:1.6;color:#BFC3C7">Clases para niños, jóvenes y adultos, separadas por nivel y por edad. Si nunca entrenaste, empezás en principiantes — sin apuro y sin exigencia de competencia.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
+      <sc-for list="{{ disciplinas }}" as="d" hint-placeholder-count="6">
+        <button type="button" onClick="{{ d.open }}" data-reveal style="opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s ease;position:relative;min-height:440px;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;overflow:hidden;background:#0A0A0A;border:1px solid rgba(191,195,199,.12);text-align:left;cursor:pointer;color:#F5F5F5;font-family:inherit" style-hover="border-color:rgba(241,6,0,.65)">
+          <img src="{{ d.img }}" alt="{{ d.titulo }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.4) brightness(.5);transition:transform .8s ease,filter .8s ease" style-hover="transform:scale(1.07);filter:grayscale(.1) brightness(.6)" />
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.1) 30%,rgba(10,10,10,.92))"></div>
+          <div style="position:relative">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#F10600;text-transform:uppercase">{{ d.kicker }}</div>
+            <h3 style="margin:12px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:26px;line-height:1.05;text-transform:uppercase">{{ d.titulo }}</h3>
+            <p style="margin:14px 0 0;font-size:15px;line-height:1.55;color:#BFC3C7">{{ d.resumen }}</p>
+            <div style="margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Ver disciplina →</div>
+          </div>
+        </button>
+      </sc-for>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pHorarios }}" hint-placeholder-val="{{ true }}">
+  <section id="horarios" data-screen-label="Horarios" style="padding:clamp(80px,9vw,140px) 28px;background:#0A0A0A">
+    <div style="max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:clamp(28px,3.5vw,48px)">
+        <div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Horarios</span>
+          <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Semana de entrenamiento</h2>
+        </div>
+        <a href="#contacto" onClick="{{ goContacto }}" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#F10600;border-bottom:1px solid rgba(241,6,0,.4);padding-bottom:4px" style-hover="color:#F5F5F5;border-color:#F5F5F5">Consultar horario actualizado →</a>
+      </div>
+
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s .1s ease,transform .9s .1s ease;border:1px solid rgba(191,195,199,.16)">
+        <div style="display:grid;grid-template-columns:minmax(140px,1.4fr) minmax(90px,.9fr) minmax(90px,.9fr) minmax(90px,1fr);gap:1px;background:rgba(191,195,199,.16)">
+          <div style="background:#141414;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Clase</div>
+          <div style="background:#141414;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Días</div>
+          <div style="background:#141414;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Hora</div>
+          <div style="background:#141414;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Nivel</div>
+
+          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">BJJ Adultos</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Lun · Mié · Vie</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">19:00 – 20:30</div>
+          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#F10600">Todos</span></div>
+
+          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">BJJ Principiantes</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">19:00 – 20:00</div>
+          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Inicial</span></div>
+
+          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">No-Gi</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">20:00 – 21:30</div>
+          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Intermedio</span></div>
+
+          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">Artes marciales / MMA</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Lun · Mié</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">20:30 – 22:00</div>
+          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Avanzado</span></div>
+
+          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">Kids 4–8</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">17:00 – 17:45</div>
+          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Infantil</span></div>
+
+          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">Kids 9–14</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">18:00 – 19:00</div>
+          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Juvenil</span></div>
+        </div>
+      </div>
+      <p style="margin:18px 0 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:#BFC3C7">* Horarios de referencia — confirmá disponibilidad por WhatsApp antes de tu primera clase.</p>
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;margin-top:clamp(40px,5vw,72px);display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:rgba(191,195,199,.16);border:1px solid rgba(191,195,199,.16)">
+        <div style="background:#0A0A0A;padding:26px 24px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Ubicación</div>
+          <div style="margin-top:12px;font-size:17px;font-weight:600;line-height:1.5">Sucre 1124 entre Bulnes y Mautín<br /><span style="color:#BFC3C7;font-weight:400;font-size:15px">Barrio Villa Morra · Asunción</span></div>
+        </div>
+        <div style="background:#0A0A0A;padding:26px 24px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Cómo llegar</div>
+          <div style="margin-top:12px;font-size:15px;line-height:1.6;color:#BFC3C7">Estacionamiento sobre la calle y acceso directo al tatami. Llegá 10 minutos antes de tu primera clase.</div>
+        </div>
+        <div style="background:#0A0A0A;padding:26px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:16px">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Consultas</div>
+            <div style="margin-top:12px;font-size:15px;line-height:1.6;color:#BFC3C7">Te confirmamos horario y cupo al instante por WhatsApp.</div>
+          </div>
+          <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="padding:13px 22px;text-align:center;background:#F10600;color:#fff;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000;color:#fff">Escribir por WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pInicio }}" hint-placeholder-val="{{ true }}">
+  <section data-screen-label="Beneficios" style="position:relative;padding:clamp(80px,9vw,140px) 28px;background:#121212;overflow:hidden">
+    <div style="position:absolute;right:-10%;top:-20%;width:46vw;height:46vw;border-radius:50%;background:radial-gradient(circle,rgba(241,6,0,.14),rgba(241,6,0,0) 65%)"></div>
+    <div style="position:relative;max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;text-align:center;max-width:52ch;margin:0 auto">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Por qué RAM</span>
+        <h2 style="margin:16px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(28px,3.2vw,48px);line-height:.98;letter-spacing:-.02em;text-transform:uppercase">Lo que te llevás del tatami</h2>
+        <div style="width:64px;height:3px;background:#F10600;margin:20px auto 0"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr) minmax(0,1fr);gap:clamp(24px,3.2vw,56px);align-items:center;margin-top:clamp(36px,4vw,64px)">
+        <div style="display:grid;gap:clamp(24px,2.4vw,38px);text-align:right">
+          <div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0s cubic-bezier(.2,.7,.2,1),transform .9s 0s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Técnica real</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Nada de coreografía: posiciones que funcionan bajo presión, enseñadas paso a paso.</p>
+          </div>
+          <div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0.06s cubic-bezier(.2,.7,.2,1),transform .9s 0.06s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Estado físico</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Fuerza funcional, movilidad y resistencia, sin pasar horas mirando el reloj del gimnasio.</p>
+          </div>
+          <div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0.12s cubic-bezier(.2,.7,.2,1),transform .9s 0.12s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Defensa personal</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Saber controlar una situación y salir de ella. Confianza que se nota afuera del tatami.</p>
+          </div>
+        </div>
+        <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s .1s ease,transform .9s .1s ease;position:relative">
+          <img src="uploads/_MG_7043.JPG.jpeg" alt="Entrenamiento de jiu-jitsu en RAM" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;filter:contrast(1.06)" />
+        </div>
+        <div style="display:grid;gap:clamp(24px,2.4vw,38px)">
+          <div data-reveal style="opacity:0;transform:translate(44px,12px);transition:opacity .9s 0.06s cubic-bezier(.2,.7,.2,1),transform .9s 0.06s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Cabeza fría</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Disciplina mental, manejo de la frustración y foco. El jiu-jitsu enseña a perder bien.</p>
+          </div>
+          <div data-reveal style="opacity:0;transform:translate(44px,12px);transition:opacity .9s 0.12s cubic-bezier(.2,.7,.2,1),transform .9s 0.12s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Acompañamiento</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Instructores que te conocen por nombre y corrigen tu progreso, clase a clase.</p>
+          </div>
+          <div data-reveal style="opacity:0;transform:translate(44px,12px);transition:opacity .9s 0.18s cubic-bezier(.2,.7,.2,1),transform .9s 0.18s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Comunidad</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Gente que te espera para entrenar. La razón número uno por la que nadie abandona.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pInicio }}" hint-placeholder-val="{{ true }}">
+  <section data-screen-label="Galería preview" style="padding:clamp(70px,8vw,120px) 0 0;background:#0A0A0A">
+    <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;text-align:center;padding:0 28px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Galería</span>
+      <h2 style="margin:16px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(28px,3.2vw,48px);line-height:.98;letter-spacing:-.02em;text-transform:uppercase">Así se entrena en RAM</h2>
+      <div style="width:64px;height:3px;background:#F10600;margin:20px auto 0"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:clamp(32px,4vw,56px)">
+      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;position:relative;display:block;overflow:hidden">
+        <img src="uploads/_MG_6990.JPG.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
+      </a>
+      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .06s ease,transform .8s .06s ease;position:relative;display:block;overflow:hidden">
+        <img src="uploads/_MG_7086%20(1).JPG.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
+      </a>
+      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .12s ease,transform .8s .12s ease;position:relative;display:block;overflow:hidden">
+        <img src="uploads/_MG_7102.JPG.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
+      </a>
+      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .18s ease,transform .8s .18s ease;position:relative;display:block;overflow:hidden">
+        <img src="uploads/IMG_9774.jpg.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
+      </a>
+    </div>
+    <div style="display:flex;justify-content:center;padding:clamp(32px,4vw,52px) 28px 0">
+      <a href="#galeria" onClick="{{ goGaleria }}" style="padding:16px 34px;background:#F10600;color:#fff;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)" style-hover="background:#A30000">Ver toda la galería</a>
+    </div>
+    <div style="max-width:1320px;margin:0 auto;padding:clamp(60px,7vw,100px) 28px clamp(70px,8vw,120px);display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:clamp(28px,4vw,64px);text-align:center">
+      <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s ease">
+        <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(17px,1.4vw,21px);text-transform:uppercase">Nosotros</h3>
+        <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">Academia de Brazilian Jiu-Jitsu en Asunción. Técnica real, instructores presentes y un tatami donde todos empiezan de cero alguna vez.</p>
+        <a href="#nosotros" onClick="{{ goNosotros }}" style="display:inline-block;margin-top:18px;padding:11px 24px;background:#F10600;color:#fff;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000">Más</a>
+      </div>
+      <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .8s .08s ease,transform .8s .08s ease">
+        <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(17px,1.4vw,21px);text-transform:uppercase">Horarios</h3>
+        <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">Lunes a viernes · 07:00 – 21:00<br />Sábados · 09:00 – 13:00<br />Clases por nivel y por edad.</p>
+        <a href="#horarios" onClick="{{ goHorarios }}" style="display:inline-block;margin-top:18px;padding:11px 24px;background:#F10600;color:#fff;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000">Ver horarios</a>
+      </div>
+      <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .8s .16s ease,transform .8s .16s ease">
+        <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(17px,1.4vw,21px);text-transform:uppercase">Contacto</h3>
+        <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">Sucre 1124 entre Bulnes y Mautín · Villa Morra, Asunción<br />WhatsApp · (0981) 105-384<br />ram.romero81@gmail.com</p>
+        <a href="#contacto" onClick="{{ goContacto }}" style="display:inline-block;margin-top:18px;padding:11px 24px;background:#F10600;color:#fff;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000">Escribinos</a>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pGaleria }}" hint-placeholder-val="{{ true }}">
+  <section id="galeria" data-screen-label="Galería" style="padding:clamp(80px,9vw,140px) 28px;background:#0A0A0A">
+    <div style="max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;margin-bottom:clamp(28px,3.5vw,48px)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Galería</span>
+        <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">La academia, de verdad</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
+      <sc-for list="{{ gallery }}" as="shot" hint-placeholder-count="12">
+        <button type="button" onClick="{{ shot.open }}" style="margin:0;padding:0;border:none;background:#141414;overflow:hidden;cursor:pointer;display:block;aspect-ratio:4/3;position:relative">
+          <img src="{{ shot.src }}" alt="{{ shot.alt }}" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s ease,filter .4s ease;filter:grayscale(.15)" style-hover="transform:scale(1.07);filter:grayscale(0)" />
+        </button>
+      </sc-for>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pNosotros }}" hint-placeholder-val="{{ true }}">
+  <section data-screen-label="Testimonios" style="padding:clamp(80px,9vw,140px) 28px;background:#121212">
+    <div style="max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;margin-bottom:clamp(28px,3.5vw,48px)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Testimonios</span>
+        <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Lo dicen los alumnos</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+        <blockquote data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .9s ease;margin:0;padding:34px 30px;background:#0A0A0A;border-top:3px solid #F10600">
+          <p style="margin:0;font-size:18px;line-height:1.6;color:#F5F5F5">“Entré sin saber nada y nunca me sentí fuera de lugar. En tres meses cambió mi estado físico y mi cabeza.”</p>
+          <footer style="margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#BFC3C7">Diego R. · Adultos BJJ</footer>
+        </blockquote>
+        <blockquote data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .08s cubic-bezier(.2,.7,.2,1),transform .9s .08s ease;margin:0;padding:34px 30px;background:#0A0A0A;border-top:3px solid #F10600">
+          <p style="margin:0;font-size:18px;line-height:1.6;color:#F5F5F5">“Mi hijo llega cansado y feliz. Aprendió a respetar turnos, a perder y a volver a intentar.”</p>
+          <footer style="margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#BFC3C7">Carolina M. · Mamá de alumno kids</footer>
+        </blockquote>
+        <blockquote data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .16s cubic-bezier(.2,.7,.2,1),transform .9s .16s ease;margin:0;padding:34px 30px;background:#0A0A0A;border-top:3px solid #F10600">
+          <p style="margin:0;font-size:18px;line-height:1.6;color:#F5F5F5">“Se entrena en serio, pero cuidando al compañero. Esa mezcla es difícil de encontrar.”</p>
+          <footer style="margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#BFC3C7">Matías F. · No-Gi</footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pInstructores }}" hint-placeholder-val="{{ true }}">
+  <section id="instructores" data-screen-label="Instructores" style="padding:clamp(80px,9vw,140px) 28px;background:#0A0A0A">
+    <div style="max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:clamp(28px,3.5vw,48px)">
+        <div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Representantes e instructores</span>
+          <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">El equipo detrás de cada clase</h2>
+        </div>
+        <p style="margin:0;max-width:40ch;font-size:16px;line-height:1.6;color:#BFC3C7">Equipo con formación en jiu-jitsu y artes marciales, enfocado en corregir técnica alumno por alumno.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+        <article data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s 0s cubic-bezier(.2,.7,.2,1),transform .9s 0s ease;background:#121212;border:1px solid rgba(191,195,199,.14)" style-hover="border-color:rgba(191,195,199,.4)">
+          <img src="uploads/_MG_7022.JPG.jpeg" alt="Entrenamiento en RAM Martial Arts" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
+          <div style="padding:28px 26px">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.15">Clases de adultos</h3>
+            <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Brazilian Jiu-Jitsu · Gi y No-Gi</div>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7">Corrección técnica alumno por alumno, con progresión clara desde principiantes hasta competencia.</p>
+          </div>
+        </article>
+        <article data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s 0.08s cubic-bezier(.2,.7,.2,1),transform .9s 0.08s ease;background:#121212;border:1px solid rgba(191,195,199,.14)" style-hover="border-color:rgba(191,195,199,.4)">
+          <img src="uploads/_MG_7103.JPG.jpeg" alt="Entrenamiento en RAM Martial Arts" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
+          <div style="padding:28px 26px">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.15">Programa infantil</h3>
+            <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Kids · 4 a 14 años</div>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7">Clases por edad: juego, coordinación, respeto y técnica, con seguimiento y graduaciones.</p>
+          </div>
+        </article>
+        <article data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s 0.16s cubic-bezier(.2,.7,.2,1),transform .9s 0.16s ease;background:#121212;border:1px solid rgba(191,195,199,.14)" style-hover="border-color:rgba(191,195,199,.4)">
+          <img src="uploads/_MG_7043.JPG.jpeg" alt="Entrenamiento en RAM Martial Arts" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
+          <div style="padding:28px 26px">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.15">Artes marciales y defensa personal</h3>
+            <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Striking · Acondicionamiento</div>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7">Golpeo, defensa personal y trabajo físico aplicado, siempre con equipo y supervisión.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pDisciplina }}" hint-placeholder-val="{{ false }}">
+  <section id="disciplina" data-screen-label="Disciplina" style="background:#0A0A0A">
+    <div style="position:relative;min-height:clamp(340px,46vh,460px);display:flex;align-items:flex-end;overflow:hidden">
+      <img src="{{ dSel.img }}" alt="{{ dSel.titulo }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.3) brightness(.5)" />
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.35) 20%,rgba(10,10,10,.95))"></div>
+      <div style="position:relative;max-width:1320px;margin:0 auto;width:100%;padding:0 28px clamp(32px,4vw,56px)">
+        <a href="#disciplinas" onClick="{{ goDisciplinas }}" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#BFC3C7" style-hover="color:#F10600">← Todas las disciplinas</a>
+        <div style="margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:#F10600">{{ dSel.kicker }}</div>
+        <h1 style="margin:14px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4.4vw,62px);line-height:1;letter-spacing:-.02em;text-transform:uppercase">{{ dSel.titulo }}</h1>
+      </div>
+    </div>
+
+    <div style="max-width:1320px;margin:0 auto;padding:clamp(48px,6vw,84px) 28px clamp(80px,9vw,130px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(32px,4vw,64px);align-items:start">
+      <div>
+        <h2 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(22px,2.2vw,30px);text-transform:uppercase">De qué se trata</h2>
+        <sc-for list="{{ dSel.lore }}" as="parrafo" hint-placeholder-count="3">
+          <p style="margin:18px 0 0;font-size:17px;line-height:1.75;color:#BFC3C7">{{ parrafo }}</p>
+        </sc-for>
+        <h2 style="margin:44px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(20px,2vw,26px);text-transform:uppercase">Qué vas a entrenar</h2>
+        <ul style="margin:18px 0 0;padding:0;list-style:none;display:grid;gap:12px">
+          <sc-for list="{{ dSel.puntos }}" as="punto" hint-placeholder-count="4">
+            <li style="display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:1.6;color:#BFC3C7"><span style="flex:0 0 auto;width:8px;height:8px;margin-top:8px;background:#F10600"></span>{{ punto }}</li>
+          </sc-for>
+        </ul>
+      </div>
+
+      <aside style="display:grid;gap:1px;background:rgba(191,195,199,.16);border:1px solid rgba(191,195,199,.16)">
+        <div style="background:#121212;padding:28px 26px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Instructor a cargo</div>
+          <div style="margin-top:14px;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">{{ dSel.instructor }}</div>
+          <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">{{ dSel.instructorBio }}</p>
+        </div>
+        <div style="background:#121212;padding:28px 26px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Para quién es</div>
+          <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">{{ dSel.paraQuien }}</p>
+        </div>
+        <div style="background:#121212;padding:28px 26px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Qué llevar</div>
+          <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">{{ dSel.equipo }}</p>
+        </div>
+        <div style="background:#121212;padding:28px 26px;display:grid;gap:12px">
+          <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="padding:15px 24px;text-align:center;background:#F10600;color:#fff;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000;color:#fff">Consultar por WhatsApp</a>
+          <a href="#horarios" onClick="{{ goHorarios }}" style="padding:15px 24px;text-align:center;border:1px solid rgba(191,195,199,.4);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700" style-hover="background:#F5F5F5;color:#0A0A0A;border-color:#F5F5F5">Ver horarios</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pPrivacidad }}" hint-placeholder-val="{{ false }}">
+  <section id="privacidad" data-screen-label="Privacidad" style="padding:clamp(120px,10vw,180px) 28px clamp(80px,9vw,140px);background:#0A0A0A">
+    <div style="max-width:820px;margin:0 auto">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Legal</span>
+      <h1 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(30px,3.6vw,52px);line-height:1;letter-spacing:-.02em;text-transform:uppercase">Políticas de privacidad</h1>
+      <p style="margin:14px 0 0;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#BFC3C7">Última actualización · Octubre 2026</p>
+
+      <h2 style="margin:48px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">1. Qué datos recolectamos</h2>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Solo los datos que nos dejás voluntariamente en el formulario de contacto o al escribirnos por WhatsApp: nombre, teléfono o correo electrónico, disciplina de interés y el mensaje que redactes. No usamos cookies de seguimiento ni perfiles publicitarios.</p>
+
+      <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">2. Para qué los usamos</h2>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Para responder tu consulta, coordinar tu clase de prueba, informarte horarios, cupos y novedades de la academia. No enviamos comunicaciones masivas sin tu consentimiento.</p>
+
+      <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">3. Con quién los compartimos</h2>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Con nadie. No vendemos ni cedemos tus datos a terceros. El contacto se gestiona por WhatsApp y correo electrónico, cuyas plataformas aplican sus propias políticas de privacidad.</p>
+
+      <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">4. Imágenes de clases y eventos</h2>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Publicamos fotos y videos de entrenamientos, actividades y competencias. Si aparecés —o aparece un menor a tu cargo— y querés que retiremos una imagen, escribinos y la damos de baja.</p>
+
+      <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">5. Menores de edad</h2>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Las inscripciones de menores las gestiona siempre una madre, padre o tutor, que autoriza el tratamiento de los datos y el uso de imágenes de la clase.</p>
+
+      <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">6. Tus derechos</h2>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Podés pedirnos en cualquier momento acceder, corregir o eliminar tus datos escribiendo a <a href="mailto:ram.romero81@gmail.com" style="color:#F10600">ram.romero81@gmail.com</a>. Respondemos dentro de los 10 días hábiles.</p>
+
+      <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">7. Cambios</h2>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Si actualizamos esta política, publicamos la nueva versión en esta misma página con su fecha de actualización.</p>
+
+      <a href="#inicio" onClick="{{ goInicio }}" style="display:inline-block;margin-top:48px;padding:15px 30px;border:1px solid rgba(191,195,199,.4);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700" style-hover="background:#F5F5F5;color:#0A0A0A;border-color:#F5F5F5">Volver al inicio</a>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pCta }}" hint-placeholder-val="{{ true }}">
+  <section data-screen-label="CTA" style="position:relative;padding:clamp(90px,10vw,160px) 28px;overflow:hidden;background:#0A0A0A">
+    <img src="uploads/_MG_7013.JPG.jpeg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.7) brightness(.3)" />
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,10,.95),rgba(10,10,10,.55) 60%,rgba(163,0,0,.45))"></div>
+    <div data-reveal style="opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease;position:relative;max-width:1320px;margin:0 auto">
+      <h2 style="margin:0;max-width:16ch;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(36px,5.4vw,86px);line-height:.9;letter-spacing:-.03em;text-transform:uppercase">Tu evolución empieza en la primera clase</h2>
+      <p style="margin:24px 0 0;max-width:50ch;font-size:18px;line-height:1.6;color:#BFC3C7">Escribinos y coordinamos tu clase de prueba esta misma semana. Solo traé ropa cómoda.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:38px">
+        <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="padding:18px 34px;background:#F10600;color:#fff;font-weight:700;font-size:14px;letter-spacing:.16em;text-transform:uppercase;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)" style-hover="background:#A30000;color:#fff">Escribir por WhatsApp</a>
+        <a href="#contacto" onClick="{{ goContacto }}" style="padding:18px 34px;border:1px solid rgba(245,245,245,.5);color:#F5F5F5;font-weight:700;font-size:14px;letter-spacing:.16em;text-transform:uppercase" style-hover="background:rgba(245,245,245,.1);color:#F5F5F5;border-color:#F5F5F5">Agendar clase</a>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pContacto }}" hint-placeholder-val="{{ true }}">
+  <section id="contacto" data-screen-label="Contacto" style="padding:clamp(80px,9vw,140px) 28px;background:#121212">
+    <div style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(32px,5vw,72px)">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Contacto</span>
+        <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Hablemos</h2>
+        <p style="margin:22px 0 0;max-width:46ch;font-size:17px;line-height:1.7;color:#BFC3C7">Contanos tu experiencia previa (si la tenés) y qué horario te queda cómodo. Te respondemos con las opciones disponibles.</p>
+        <div style="display:grid;gap:1px;margin-top:40px;background:rgba(191,195,199,.16)">
+          <a href="mailto:ram.romero81@gmail.com" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Correo</span>
+            <span style="font-size:17px;font-weight:600">ram.romero81@gmail.com</span>
+          </a>
+          <a href="https://www.instagram.com/rammartial" target="_blank" rel="noopener" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Instagram</span>
+            <span style="font-size:17px;font-weight:600">@rammartial</span>
+          </a>
+          <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">WhatsApp</span>
+            <span style="font-size:17px;font-weight:600">(0981) 105-384</span>
+          </a>
+          <div style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Ubicación</span>
+            <span style="font-size:17px;font-weight:600;color:#BFC3C7">Sucre 1124 entre Bulnes y Mautín · Villa Morra, Asunción</span>
+          </div>
+        </div>
+      </div>
+
+      <form data-reveal onSubmit="{{ onSubmit }}" style="opacity:0;transform:translateY(24px);transition:opacity .9s .1s ease,transform .9s .1s ease;background:#0A0A0A;padding:clamp(28px,3vw,44px);border:1px solid rgba(191,195,199,.14);display:grid;gap:20px;align-content:start">
+        <div style="display:grid;gap:8px">
+          <label for="ram-nombre" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#BFC3C7">Nombre</label>
+          <input id="ram-nombre" name="nombre" type="text" placeholder="Tu nombre" style="background:#121212;border:1px solid rgba(191,195,199,.2);color:#F5F5F5;padding:14px 16px;font-size:16px;outline:none" style-focus="border-color:#F10600" />
+        </div>
+        <div style="display:grid;gap:8px">
+          <label for="ram-contacto" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#BFC3C7">Teléfono o correo</label>
+          <input id="ram-contacto" name="contacto" type="text" placeholder="Para poder responderte" style="background:#121212;border:1px solid rgba(191,195,199,.2);color:#F5F5F5;padding:14px 16px;font-size:16px;outline:none" style-focus="border-color:#F10600" />
+        </div>
+        <div style="display:grid;gap:8px">
+          <label for="ram-interes" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#BFC3C7">Me interesa</label>
+          <select id="ram-interes" name="interes" style="background:#121212;border:1px solid rgba(191,195,199,.2);color:#F5F5F5;padding:14px 16px;font-size:16px;outline:none" style-focus="border-color:#F10600">
+            <option>Brazilian Jiu-Jitsu</option>
+            <option>No-Gi / Grappling</option>
+            <option>MMA / Artes marciales mixtas</option>
+            <option>Kick Boxing</option>
+            <option>Boxeo</option>
+            <option>Clases para niños y jóvenes</option>
+            <option>Cursos y talleres para empresas</option>
+            <option>Clase personalizada</option>
+          </select>
+        </div>
+        <div style="display:grid;gap:8px">
+          <label for="ram-mensaje" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#BFC3C7">Mensaje</label>
+          <textarea id="ram-mensaje" name="mensaje" rows="4" placeholder="Contanos tu experiencia y horario preferido" style="background:#121212;border:1px solid rgba(191,195,199,.2);color:#F5F5F5;padding:14px 16px;font-size:16px;outline:none;resize:vertical" style-focus="border-color:#F10600"></textarea>
+        </div>
+        <button type="submit" style="padding:18px 28px;background:#F10600;color:#fff;border:none;font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)" style-hover="background:#A30000">Enviar consulta</button>
+        <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:12px;color:#BFC3C7">Gracias — te contactamos a la brevedad.</p>
+        </sc-if>
+      </form>
+    </div>
+  </section>
+
+  </sc-if>
+
+  <footer id="ram-footer" style="padding:clamp(48px,6vw,80px) 28px 32px;background:#0A0A0A;border-top:1px solid rgba(191,195,199,.14)">
+    <div style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px;align-items:start">
+      <div>
+        <img src="uploads/Logotipo%20deportivo%20RAM%20BJJ%20con%20cintur%C3%B3n%20negro%20(2).png" alt="RAM BJJ" style="width:170px;height:auto;mix-blend-mode:screen;display:block" />
+        <p style="margin:18px 0 0;max-width:34ch;font-size:14px;line-height:1.6;color:#BFC3C7">Academia de BJJ y artes marciales en Villa Morra, Asunción. Técnica, disciplina y comunidad.</p>
+      </div>
+      <nav style="display:grid;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Navegación</span>
+        <a href="#nosotros" onClick="{{ goNosotros }}" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Nosotros</a>
+        <a href="#disciplinas" onClick="{{ goDisciplinas }}" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Disciplinas</a>
+        <a href="#horarios" onClick="{{ goHorarios }}" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Horarios</a>
+        <a href="#galeria" onClick="{{ goGaleria }}" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Galería</a>
+        <a href="#instructores" onClick="{{ goInstructores }}" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Instructores</a>
+      </nav>
+      <nav style="display:grid;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Contacto</span>
+        <a href="mailto:ram.romero81@gmail.com" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">ram.romero81@gmail.com</a>
+        <a href="https://www.instagram.com/rammartial" target="_blank" rel="noopener" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Instagram</a>
+        <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">WhatsApp</a>
+      </nav>
+      <div style="display:grid;gap:10px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Entrená con nosotros</span>
+        <a href="#contacto" onClick="{{ goContacto }}" style="padding:14px 22px;text-align:center;background:#F10600;color:#fff;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000;color:#fff">Agendar clase</a>
+      </div>
+    </div>
+    <div style="max-width:1320px;margin:48px auto 0;padding-top:24px;border-top:1px solid rgba(191,195,199,.12);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#BFC3C7">
+      <span>© 2026 RAM Martial Arts · Asunción, Paraguay</span>
+      <span style="display:flex;flex-wrap:wrap;gap:18px;align-items:center">
+        <a href="#privacidad" onClick="{{ goPrivacidad }}" style="color:#BFC3C7;letter-spacing:.14em" style-hover="color:#F10600">Políticas de privacidad</a>
+        <span>Desarrollado por <a href="https://neura.com.py" target="_blank" rel="noopener" style="color:#F5F5F5;letter-spacing:.14em" style-hover="color:#F10600">Neura</a></span>
+      </span>
+    </div>
+  </footer>
+</div>
+  <a id="ram-wa" href="{{ whatsappUrl }}" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp" style="position:fixed;right:22px;bottom:22px;z-index:150;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#25D366;box-shadow:0 10px 30px rgba(0,0,0,.45);transition:opacity .35s ease,transform .35s ease" style-hover="background:#1FB255;transform:scale(1.06)">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="#0A0A0A" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.38a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.83 9.83 0 0 0 12.04 2Zm0 18.06h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.17 8.17 0 0 1-1.25-4.37c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.82 2.41a8.16 8.16 0 0 1 2.41 5.82c0 4.54-3.69 8.24-8.21 8.24Zm4.52-6.16c-.25-.12-1.46-.72-1.69-.8-.23-.09-.39-.12-.56.12-.17.25-.64.8-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.48-1.38-1.73-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.41-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.86.84-.86 2.05s.89 2.38 1.01 2.54c.12.17 1.74 2.66 4.22 3.73.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29Z"/></svg>
+  </a>
+  <sc-if value="{{ lbOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ lbClose }}" style="position:fixed;inset:0;z-index:200;background:rgba(5,5,5,.94);display:flex;align-items:center;justify-content:center;padding:clamp(16px,4vw,56px)">
+    <button type="button" onClick="{{ lbClose }}" aria-label="Cerrar" style="position:absolute;top:18px;right:20px;width:46px;height:46px;border:1px solid rgba(245,245,245,.35);background:transparent;color:#F5F5F5;font-size:22px;line-height:1;cursor:pointer" style-hover="background:#F10600;border-color:#F10600">×</button>
+    <button type="button" onClick="{{ lbPrev }}" aria-label="Anterior" style="position:absolute;left:clamp(10px,2vw,28px);top:50%;transform:translateY(-50%);width:54px;height:54px;border:1px solid rgba(245,245,245,.35);background:rgba(10,10,10,.6);color:#F5F5F5;font-size:24px;line-height:1;cursor:pointer" style-hover="background:#F10600;border-color:#F10600">‹</button>
+    <button type="button" onClick="{{ lbNext }}" aria-label="Siguiente" style="position:absolute;right:clamp(10px,2vw,28px);top:50%;transform:translateY(-50%);width:54px;height:54px;border:1px solid rgba(245,245,245,.35);background:rgba(10,10,10,.6);color:#F5F5F5;font-size:24px;line-height:1;cursor:pointer" style-hover="background:#F10600;border-color:#F10600">›</button>
+    <figure style="margin:0;max-width:min(1100px,92vw);max-height:86vh;display:flex;flex-direction:column;align-items:center;gap:14px">
+      <img src="{{ lbSrc }}" alt="{{ lbAlt }}" style="max-width:100%;max-height:78vh;object-fit:contain;display:block" />
+      <figcaption style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">{{ lbCounter }}</figcaption>
+    </figure>
+  </div>
+  </sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;595981105384&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contacto&quot;}}">
+class Component extends DCLogic {
+  state = { sent: false, page: 'inicio', lb: -1, disc: 'bjj' };
+
+  go(page) {
+    return (e) => {
+      if (e) e.preventDefault();
+      this.setState({ page });
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    };
+  }
+
+  componentDidMount() {
+    const header = document.getElementById('ram-header');
+    const onScroll = () => {
+      if (!header) return;
+      const solid = window.scrollY > 40;
+      header.style.background = solid ? 'rgba(10,10,10,.94)' : 'linear-gradient(180deg,rgba(10,10,10,.92),rgba(10,10,10,0))';
+      header.style.padding = solid ? '12px 28px' : '18px 28px';
+      header.style.borderColor = solid ? 'rgba(191,195,199,.16)' : 'rgba(191,195,199,0)';
+      if (this._scan) this._scan();
+      if (this._waWatch) this._waWatch();
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    this._onScroll = onScroll;
+
+    this._onKey = (e) => {
+      if (this.state.lb < 0) return;
+      if (e.key === 'Escape') this.setState({ lb: -1 });
+      else if (e.key === 'ArrowRight') this.lbMove(1);
+      else if (e.key === 'ArrowLeft') this.lbMove(-1);
+    };
+    window.addEventListener('keydown', this._onKey);
+
+    this._waWatch = () => {
+      const wa = document.getElementById('ram-wa');
+      const foot = document.getElementById('ram-footer');
+      if (!wa || !foot) return;
+      const hide = foot.getBoundingClientRect().top < window.innerHeight - 40;
+      wa.style.opacity = hide ? '0' : '1';
+      wa.style.pointerEvents = hide ? 'none' : 'auto';
+      wa.style.transform = hide ? 'scale(.8)' : 'scale(1)';
+    };
+    window.addEventListener('scroll', this._waWatch, { passive: true });
+    setTimeout(this._waWatch, 100);
+
+    const show = (el) => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; };
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { show(e.target); io.unobserve(e.target); } });
+    }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
+    this._io = io;
+
+    this._scan = () => {
+      document.querySelectorAll('[data-reveal]').forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.95) show(el);
+        else io.observe(el);
+      });
+    };
+    this._scan();
+    requestAnimationFrame(this._scan);
+    this._mo = new MutationObserver(() => {
+      clearTimeout(this._moT);
+      this._moT = setTimeout(this._scan, 60);
+    });
+    this._mo.observe(document.body, { childList: true, subtree: true });
+    this._safety = setTimeout(() => {
+      document.querySelectorAll('[data-reveal]').forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight) show(el);
+      });
+    }, 1200);
+  }
+
+  componentDidUpdate() {
+    if (this._scan) this._scan();
+  }
+
+  componentWillUnmount() {
+    if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
+    if (this._io) this._io.disconnect();
+    if (this._mo) this._mo.disconnect();
+    clearTimeout(this._safety);
+    clearTimeout(this._moT);
+  }
+
+  goAnchor(id) {
+    return (e) => {
+      if (e) e.preventDefault();
+      const jump = () => {
+        const el = document.getElementById(id);
+        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 60, behavior: 'smooth' });
+      };
+      if (this.state.page !== 'inicio') this.setState({ page: 'inicio' }, () => setTimeout(jump, 60));
+      else jump();
+    };
+  }
+
+  static SHOTS = [
+    ['PHOTO-2026-08-04-11-49-13.jpg.jpeg', 'Clase de niños en RAM'],
+    ['IMG_9774.jpg.jpeg', 'Equipo de MMA de RAM'],
+    ['_MG_6913 (1).JPG.jpeg', 'Alumna de la clase infantil'],
+    ['_MG_6948.JPG.jpeg', 'Kimono en el tatami'],
+    ['8adb4671-70b9-481f-aa99-38f197ec3e39.JPG.jpeg', 'Clase femenina de jiu-jitsu'],
+    ['_MG_7102.JPG.jpeg', 'Práctica de lucha de pie'],
+    ['_MG_6990.JPG.jpeg', 'Rolling de jiu-jitsu con kimono'],
+    ['IMG_6243.JPG.jpeg', 'Instructora con la clase de los más chicos'],
+    ['IMG_6244.JPG.jpeg', 'Clase infantil en el tatami'],
+    ['WhatsApp Image 2026-08-10 at 07.54.29.jpeg', 'Alumnos de RAM Martial Arts'],
+    ['_MG_6910.JPG.jpeg', 'Entrenamiento en el tatami'],
+    ['_MG_6963 (1).JPG.jpeg', 'Técnica de guardia'],
+    ['_MG_7013.JPG.jpeg', 'Sparring de jiu-jitsu'],
+    ['_MG_7018.JPG.jpeg', 'Equipo RAM Martial Arts'],
+    ['_MG_7022.JPG.jpeg', 'Entrenamiento guiado'],
+    ['_MG_7043.JPG.jpeg', 'Pasaje de guardia'],
+    ['_MG_7086 (1).JPG.jpeg', 'Control de posición'],
+    ['_MG_7103.JPG.jpeg', 'Proyección en el tatami'],
+    ['_MG_7125 (1).JPG.jpeg', 'Clase de adultos'],
+    ['_MG_7132 (1).JPG.jpeg', 'Entrenamiento de RAM Martial Arts']
+  ];
+
+  static DISC = [
+    {
+      key: 'bjj', kicker: 'Gi · Kimono', titulo: 'Brazilian Jiu-Jitsu',
+      img: 'uploads/_MG_6990.JPG.jpeg',
+      resumen: 'Base técnica, control de posiciones y sumisiones. El corazón de la academia.',
+      lore: [
+        'El Brazilian Jiu-Jitsu es el arte del control: en lugar de responder a la fuerza con fuerza, usa palancas, ángulos y peso corporal para dominar al oponente desde el suelo. Por eso una persona más chica puede controlar a una más grande.',
+        'Se entrena con kimono (gi), que agrega agarres y estrategia: cada solapa y cada manga es una herramienta. Las clases arrancan con movilidad, siguen con técnica del día y cierran con rolling — sparring controlado donde aplicás lo aprendido.',
+        'Es la disciplina con progresión más clara de la academia: grados, cinturones y objetivos concretos clase a clase.'
+      ],
+      puntos: ['Guardias, pasajes y control de posiciones', 'Sumisiones y defensas desde cada posición', 'Rolling progresivo según tu nivel', 'Preparación para competencia (opcional)'],
+      instructor: 'Equipo RAM · BJJ', instructorBio: 'Instructores graduados de la academia, a cargo de las clases de gi para principiantes y avanzados.',
+      paraQuien: 'Desde cero hasta competidores. Jóvenes y adultos, sin experiencia previa necesaria.',
+      equipo: 'Ropa cómoda para tu primera clase. Luego, kimono (te ayudamos a conseguirlo).'
+    },
+    {
+      key: 'nogi', kicker: 'No-Gi', titulo: 'Grappling sin kimono',
+      img: 'uploads/_MG_7043.JPG.jpeg',
+      resumen: 'Ritmo más alto, transiciones rápidas y lucha aplicada al combate real.',
+      lore: [
+        'El no-gi es jiu-jitsu sin kimono: sin agarres de tela, todo depende del control de cuerpo, la presión y la velocidad de transición. El ritmo es más alto y las posiciones cambian todo el tiempo.',
+        'Es la puerta de entrada natural al grappling moderno y la base de la lucha dentro del MMA. Se entrena con rashguard y calza o short.',
+        'Muchos alumnos combinan gi y no-gi: uno afina la técnica y la paciencia, el otro el timing y la explosividad.'
+      ],
+      puntos: ['Control de cuerpo y presión sin agarres de tela', 'Derribos y lucha de pie', 'Leg locks y sumisiones de no-gi', 'Transiciones rápidas y scrambles'],
+      instructor: 'Equipo RAM · No-Gi', instructorBio: 'A cargo de las clases de grappling y del trabajo de lucha aplicada al MMA.',
+      paraQuien: 'Alumnos de BJJ que quieren sumar ritmo y quienes vienen de lucha o MMA.',
+      equipo: 'Rashguard y calza o short deportivo sin bolsillos ni cierres.'
+    },
+    {
+      key: 'mma', kicker: 'MMA · Artes marciales mixtas', titulo: 'Artes marciales mixtas',
+      img: 'uploads/_MG_7102.JPG.jpeg',
+      resumen: 'Golpeo, derribos y suelo integrados en un mismo sistema.',
+      lore: [
+        'El MMA integra las tres distancias del combate: golpeo de pie, clinch y derribos, y lucha en el suelo. En la academia se enseña por bloques, para que cada alumno construya la base antes de combinarla.',
+        'Las clases trabajan técnica con guanteletas, pads y escudos, más drills de transición entre distancias. El sparring es progresivo, con equipo completo y siempre supervisado.',
+        'No hace falta querer competir: la mayoría entrena MMA por estado físico, coordinación y defensa personal real.'
+      ],
+      puntos: ['Golpeo con puños, codos, rodillas y patadas', 'Clinch, derribos y defensa de derribos', 'Ground and pound y control desde arriba', 'Sparring progresivo con equipo completo'],
+      instructor: 'Equipo RAM · MMA', instructorBio: 'Instructores de striking y grappling trabajando en conjunto sobre el mismo programa.',
+      paraQuien: 'Jóvenes y adultos con alguna base física. Ideal si querés entrenar completo.',
+      equipo: 'Short, rashguard, bucal y vendas. Guantes y canilleras se pueden alquilar.'
+    },
+    {
+      key: 'kick', kicker: 'Kick Boxing · Boxeo', titulo: 'Kick boxing y boxeo',
+      img: 'uploads/IMG_9774.jpg.jpeg',
+      resumen: 'Golpeo con guantes, juego de piernas y acondicionamiento por rondas.',
+      lore: [
+        'El boxeo construye la base de todo golpeo: guardia, distancia, juego de piernas y la capacidad de leer al oponente. El kick boxing suma patadas y rodillas, ampliando el rango y el trabajo de cadera.',
+        'Las clases se estructuran en rondas: calentamiento, técnica en pads o bolsa, combinaciones y acondicionamiento final. Es la disciplina más directa para bajar grasa y mejorar el cardio.',
+        'Podés entrenarlo sin nunca subir al ring: el sparring es opcional y siempre controlado.'
+      ],
+      puntos: ['Guardia, desplazamientos y distancia', 'Combinaciones en pads y bolsa', 'Patadas, rodillas y trabajo de clinch', 'Acondicionamiento por rondas'],
+      instructor: 'Equipo RAM · Striking', instructorBio: 'A cargo de las clases de golpeo, pads y preparación física de la academia.',
+      paraQuien: 'Cualquier nivel y edad desde adolescentes. No se requiere experiencia.',
+      equipo: 'Ropa deportiva, vendas y bucal. Guantes disponibles en la academia.'
+    },
+    {
+      key: 'kids', kicker: 'Niños y jóvenes', titulo: 'Niños y adolescentes',
+      img: 'uploads/IMG_6244.JPG.jpeg',
+      resumen: 'Coordinación, respeto y confianza. Clases por edad, con juego y estructura.',
+      lore: [
+        'El programa infantil usa el jiu-jitsu como herramienta educativa: los chicos aprenden a cuidar al compañero, esperar su turno, perder sin frustrarse y volver a intentar.',
+        'Las clases se dividen por edad y por tamaño, combinando juegos de movimiento con técnica real. Trabajan coordinación, equilibrio y fuerza relativa sin cargas.',
+        'A medida que crecen, el juego cede lugar a la técnica y a los grados, con graduaciones que marcan el progreso de cada alumno.'
+      ],
+      puntos: ['Juegos de movimiento y coordinación', 'Técnica de jiu-jitsu adaptada por edad', 'Rutinas de respeto, turnos y disciplina', 'Graduaciones y seguimiento individual'],
+      instructor: 'Equipo RAM · Kids', instructorBio: 'Instructores con experiencia en clases infantiles, con grupos reducidos por franja de edad.',
+      paraQuien: 'Niños y adolescentes, divididos por edad y contextura.',
+      equipo: 'Ropa cómoda la primera clase; después kimono. Pelo recogido y uñas cortas.'
+    },
+    {
+      key: 'empresas', kicker: 'Empresas', titulo: 'Cursos y talleres para empresas',
+      img: 'uploads/_MG_7086 (1).JPG.jpeg',
+      resumen: 'Programas cerrados de defensa personal y actividad física para equipos.',
+      lore: [
+        'Armamos programas a medida para empresas: talleres de defensa personal, jornadas de actividad física y ciclos de entrenamiento para equipos, en la academia o en tu propio espacio.',
+        'Cada programa se diseña según el objetivo —bienestar, integración del equipo o seguridad personal— y se ajusta a la cantidad de participantes y a la disponibilidad horaria.',
+        'Incluye instructores, equipamiento y material para los participantes.'
+      ],
+      puntos: ['Talleres de defensa personal práctica', 'Jornadas de actividad física e integración', 'Ciclos de entrenamiento para equipos', 'Opción en la academia o en tu empresa'],
+      instructor: 'Coordinación RAM', instructorBio: 'Coordinamos el programa con el área de RR.HH. o bienestar de tu empresa.',
+      paraQuien: 'Empresas, instituciones y grupos cerrados de cualquier tamaño.',
+      equipo: 'Nosotros llevamos el equipamiento; los participantes solo necesitan ropa cómoda.'
+    }
+  ];
+
+  lbMove(step) {
+    this.setState((st) => {
+      const n = Component.SHOTS.length;
+      return { lb: ((st.lb + step) % n + n) % n };
+    });
+  }
+
+  renderVals() {
+    const num = String(this.props.whatsappNumber ?? '595981105384').replace(/[^0-9]/g, '');
+    const p = this.state.page;
+    const i = this.state.lb;
+    const shots = Component.SHOTS;
+    const cur = shots[i] || shots[0];
+    return {
+      gallery: shots.map((sh, idx) => ({
+        src: 'uploads/' + encodeURIComponent(sh[0]),
+        alt: sh[1],
+        open: () => this.setState({ lb: idx })
+      })),
+      lbOpen: i >= 0,
+      lbSrc: 'uploads/' + encodeURIComponent(cur[0]),
+      lbAlt: cur[1],
+      lbCounter: (i + 1) + ' / ' + shots.length,
+      lbClose: (e) => { if (!e || e.target === e.currentTarget || (e.currentTarget && e.currentTarget.tagName === 'BUTTON')) this.setState({ lb: -1 }); },
+      lbPrev: (e) => { if (e) e.stopPropagation(); this.lbMove(-1); },
+      lbNext: (e) => { if (e) e.stopPropagation(); this.lbMove(1); },
+      pInicio: p === 'inicio',
+      pNosotros: p === 'nosotros',
+      pDisciplinas: p === 'inicio',
+      pHorarios: p === 'inicio',
+      pGaleria: p === 'galeria',
+      pInstructores: p === 'instructores',
+      pContacto: p === 'contacto',
+      pPrivacidad: p === 'privacidad',
+      pDisciplina: p === 'disciplina',
+      disciplinas: Component.DISC.map((d) => ({
+        ...d,
+        img: d.img.replace(/ /g, '%20'),
+        open: () => { this.setState({ page: 'disciplina', disc: d.key }); window.scrollTo({ top: 0, behavior: 'auto' }); }
+      })),
+      dSel: (() => {
+        const d = Component.DISC.find((x) => x.key === this.state.disc) || Component.DISC[0];
+        return { ...d, img: d.img.replace(/ /g, '%20') };
+      })(),
+      pCta: p === 'inicio' || p === 'instructores' || p === 'galeria',
+      goInicio: this.go('inicio'),
+      goNosotros: this.go('nosotros'),
+      goDisciplinas: this.goAnchor('disciplinas'),
+      goHorarios: this.goAnchor('horarios'),
+      goGaleria: this.go('galeria'),
+      goInstructores: this.go('instructores'),
+      goContacto: this.go('contacto'),
+      goPrivacidad: this.go('privacidad'),
+      sent: this.state.sent,
+      whatsappUrl: 'https://wa.me/' + num,
+      onSubmit: (e) => {
+        e.preventDefault();
+        const f = e.target;
+        const get = (id) => { const el = f.querySelector('#' + id); return el ? el.value.trim() : ''; };
+        const txt = [
+          'Hola RAM Martial Arts! Soy ' + (get('ram-nombre') || '(sin nombre)') + '.',
+          'Me interesa: ' + (get('ram-interes') || 'entrenar'),
+          get('ram-mensaje') ? 'Mensaje: ' + get('ram-mensaje') : '',
+          get('ram-contacto') ? 'Mi contacto: ' + get('ram-contacto') : ''
+        ].filter(Boolean).join('\n');
+        window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(txt), '_blank', 'noopener');
+        this.setState({ sent: true });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
