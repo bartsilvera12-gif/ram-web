@@ -152,9 +152,62 @@
     /* --- Grillas --- */
     [data-ram-grid="split2"] { grid-template-columns: 1fr !important; }
 
-    /* --- Tabla de horarios: scroll horizontal en vez de recortarse --- */
-    [data-ram="sched-wrap"] { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    [data-ram-grid="sched"] { min-width: 600px; }
+    /* --- Horarios: una tarjeta por clase en vez de tabla ---
+       El grid son 28 celdas sueltas (1 fila de encabezados + 6 de datos), sin
+       contenedor por fila. Se apila en una columna y cada grupo de 4 celdas se
+       dibuja como tarjeta con nth-child; los encabezados se ocultan y vuelven
+       como etiqueta de cada dato vía ::before. */
+    [data-ram="sched-wrap"] { border: none !important; }
+    [data-ram-grid="sched"] {
+      grid-template-columns: 1fr !important;
+      gap: 0 !important;
+      background: transparent !important;
+    }
+    [data-ram-grid="sched"] > div:nth-child(-n+4) { display: none !important; }
+
+    [data-ram-grid="sched"] > div {
+      background: #121212 !important;
+      border-left: 1px solid rgba(191,195,199,.16);
+      border-right: 1px solid rgba(191,195,199,.16);
+    }
+    /* nombre de la clase: cabecera de la tarjeta */
+    [data-ram-grid="sched"] > div:nth-child(4n+1) {
+      margin-top: 14px;
+      border-top: 1px solid rgba(191,195,199,.16);
+      border-left: 3px solid #F10600;
+      padding: 17px 18px 13px !important;
+      font-size: 17px !important;
+    }
+    [data-ram-grid="sched"] > div:nth-child(5) { margin-top: 0; }
+
+    /* días, hora y nivel: etiqueta a la izquierda, valor a la derecha */
+    [data-ram-grid="sched"] > div:nth-child(4n+2),
+    [data-ram-grid="sched"] > div:nth-child(4n+3),
+    [data-ram-grid="sched"] > div:nth-child(4n+4) {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      border-left: 3px solid #F10600;
+      padding: 7px 18px !important;
+    }
+    [data-ram-grid="sched"] > div:nth-child(4n+4) {
+      border-bottom: 1px solid rgba(191,195,199,.16);
+      padding-bottom: 17px !important;
+    }
+    [data-ram-grid="sched"] > div:nth-child(4n+2)::before,
+    [data-ram-grid="sched"] > div:nth-child(4n+3)::before,
+    [data-ram-grid="sched"] > div:nth-child(4n+4)::before {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: #BFC3C7;
+      flex: 0 0 auto;
+    }
+    [data-ram-grid="sched"] > div:nth-child(4n+2)::before { content: "Días"; }
+    [data-ram-grid="sched"] > div:nth-child(4n+3)::before { content: "Hora"; }
+    [data-ram-grid="sched"] > div:nth-child(4n+4)::before { content: "Nivel"; }
 
     /* --- Hero: degradado vertical (el de escritorio es horizontal) --- */
     [data-ram="hero-ov"] {

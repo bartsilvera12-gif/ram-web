@@ -40,9 +40,12 @@ Breakpoints: **1024px** (tablet), **860px** (pasa a menú hamburguesa), **760px*
 
 Decisiones que conviene conocer antes de editar:
 
-- La tabla de horarios no se reorganiza: se desplaza en horizontal dentro de
-  `[data-ram="sched-wrap"]`. Con cuatro columnas de datos es más legible así que
-  apilada.
+- La tabla de horarios se convierte en una tarjeta por clase debajo de 860px.
+  El grid son 28 celdas sueltas (1 fila de encabezados + 6 de datos) sin
+  contenedor por fila, así que las tarjetas se arman con `nth-child(4n+k)`:
+  los encabezados se ocultan y vuelven como etiqueta de cada dato vía `::before`.
+  **Si agregás o quitás clases, mantené las filas de 4 celdas**, o la cuenta se
+  desalinea y las etiquetas quedan en el dato equivocado.
 - Debajo de 860px se anula el `transform` de las animaciones de entrada. Varias
   desplazan hasta 44px en horizontal y empujaban el contenido fuera de pantalla.
   El fundido de opacidad se mantiene.
