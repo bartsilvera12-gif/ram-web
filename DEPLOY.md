@@ -24,7 +24,30 @@ Editá siempre `RAM Martial Arts.dc.html` y después regenerá la página public
 node scripts/build-index.mjs
 ```
 
-El bloque de `<title>`, descripción y Open Graph vive en `scripts/seo-head.html`.
+`scripts/seo-head.html` contiene el bloque de `<title>`, descripción y Open Graph,
+y también el script del menú móvil (va en el `<head>` real porque el runtime no
+ejecuta los `<script>` que se declaran dentro de `<helmet>`).
+
+## Responsive
+
+El sitio usa estilos inline, así que la capa responsive vive en el `<style>` del
+`<helmet>`, al final del bloque, y usa `!important` para poder sobrescribirlos.
+Los elementos que necesitan adaptarse están marcados con atributos `data-ram`
+y `data-ram-grid`, en vez de depender del texto del `style` inline.
+
+Breakpoints: **1024px** (tablet), **860px** (pasa a menú hamburguesa), **760px**
+(móvil) y **420px** (móvil chico).
+
+Decisiones que conviene conocer antes de editar:
+
+- La tabla de horarios no se reorganiza: se desplaza en horizontal dentro de
+  `[data-ram="sched-wrap"]`. Con cuatro columnas de datos es más legible así que
+  apilada.
+- Debajo de 860px se anula el `transform` de las animaciones de entrada. Varias
+  desplazan hasta 44px en horizontal y empujaban el contenido fuera de pantalla.
+  El fundido de opacidad se mantiene.
+- El degradado del hero es horizontal en escritorio y vertical en móvil, porque
+  el texto pasa de estar a la izquierda a ocupar todo el ancho.
 
 ## Subir
 

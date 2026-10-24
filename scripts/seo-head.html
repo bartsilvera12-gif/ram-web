@@ -11,3 +11,43 @@
 <meta property="og:locale" content="es_PY" />
 <meta property="og:image" content="https://rammartialarts.vercel.app/uploads/IMG_9774.jpg.jpeg" />
 <meta name="twitter:card" content="summary_large_image" />
+<script>
+(function () {
+  var MOBILE = 860;
+  var root = document.documentElement;
+
+  function setHeaderHeight() {
+    var h = document.getElementById('ram-header');
+    if (h) root.style.setProperty('--ram-header-h', h.offsetHeight + 'px');
+  }
+  function close() {
+    root.classList.remove('ram-menu-open');
+    var b = document.getElementById('ram-menu-btn');
+    if (b) b.setAttribute('aria-expanded', 'false');
+  }
+
+  // Delegado en document: sobrevive a los re-render del runtime.
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('#ram-menu-btn');
+    if (btn) {
+      setHeaderHeight();
+      var open = root.classList.toggle('ram-menu-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      return;
+    }
+    if (e.target.closest && e.target.closest('#ram-nav a')) close();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') close();
+  });
+
+  window.addEventListener('resize', function () {
+    setHeaderHeight();
+    if (window.innerWidth > MOBILE) close();
+  });
+
+  window.addEventListener('load', setHeaderHeight);
+  setTimeout(setHeaderHeight, 300);
+})();
+</script>
