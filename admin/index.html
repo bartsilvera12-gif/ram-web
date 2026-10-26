@@ -101,8 +101,17 @@
     background: rgba(29,31,36,.86); backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--borde);
   }
-  .marca { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.01em; }
-  .marca span { color: var(--rojo); }
+  .marca { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .marca img {
+    height: 30px; width: auto; display: block;
+    /* el PNG trae fondo negro: screen lo funde con la barra */
+    mix-blend-mode: screen;
+  }
+  .marca span {
+    font-weight: 600; font-size: 14px; color: var(--apagado);
+    padding-left: 11px; border-left: 1px solid var(--borde);
+    white-space: nowrap;
+  }
 
   nav.tabs {
     display: flex; gap: 6px; padding: 10px 18px;
@@ -380,6 +389,10 @@
   }
 
   @media (max-width: 420px) {
+    /* en pantallas angostas el logo ya identifica: el texto sobra */
+    .marca span { display: none; }
+    .marca img { height: 26px; }
+    #quien { font-size: 11px; }
     .login { padding: 16px; }
     .login-caja { padding: 30px 22px 24px; }
   }
@@ -399,7 +412,7 @@
 <div id="pantalla-login" class="login oculto">
   <div class="login-fondo" aria-hidden="true"></div>
   <div class="login-caja">
-    <img class="login-logo" src="../uploads/Logotipo%20RAM%20de%20artes%20marciales.png" alt="RAM Martial Arts">
+    <img class="login-logo" src="../logo-ram.png" alt="RAM Martial Arts">
     <h1 class="login-titulo">Panel de administración</h1>
     <p class="login-bajada">Entrá con la cuenta de administración para editar el contenido del sitio.</p>
 
@@ -442,7 +455,10 @@
 <!-- Panel -->
 <div id="pantalla-panel" class="oculto">
   <header class="barra">
-    <div class="marca">RAM<span>.</span> Panel</div>
+    <div class="marca">
+      <img src="../logo-ram.png" alt="RAM Martial Arts">
+      <span>Panel</span>
+    </div>
     <div style="display:flex;align-items:center;gap:14px">
       <span id="quien" class="ficha-meta"></span>
       <button class="btn fantasma chico" id="btn-salir">Salir</button>
