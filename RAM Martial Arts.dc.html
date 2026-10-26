@@ -22,6 +22,90 @@
   @keyframes ramPulse { 0%,100% { opacity: .35; } 50% { opacity: .7; } }
   @keyframes ramDrift { 0% { transform: translateY(0); } 100% { transform: translateY(-14px); } }
 
+
+  /* ============================================================
+     DISCIPLINAS: carrusel horizontal guiado por el scroll vertical
+     El alto de [data-ram="dx"] lo calcula el script a partir del ancho
+     real del track, para que lo que se scrollea hacia abajo sea
+     exactamente lo que falta recorrer hacia el costado.
+     ============================================================ */
+  @media (min-width: 861px) {
+    [data-ram="dx"] { position: relative; }
+    [data-ram="dx-sticky"] {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: clamp(20px, 2.6vw, 36px);
+      overflow: hidden;
+    }
+    [data-ram="dx-track"] {
+      display: flex !important;
+      grid-template-columns: none !important;
+      width: max-content;
+      gap: clamp(16px, 1.6vw, 26px) !important;
+      will-change: transform;
+    }
+    /* Las tarjetas que arrancan fuera de pantalla nunca disparan el
+       observer de entrada, así que acá se muestran siempre. */
+    [data-ram="dx-track"] > * { opacity: 1 !important; transform: none !important; }
+
+    [data-ram="dx-track"] > button {
+      width: clamp(290px, 27vw, 400px);
+      min-width: clamp(290px, 27vw, 400px);
+      min-height: 0 !important;
+      height: min(68vh, 580px);
+    }
+
+    /* Resumen y llamada a la acción suben al pasar el mouse */
+    [data-ram="dx-rev"] {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .45s ease, transform .45s ease;
+    }
+    [data-ram="dx-track"] > button:hover [data-ram="dx-rev"],
+    [data-ram="dx-track"] > button:focus-visible [data-ram="dx-rev"] {
+      opacity: 1;
+      transform: none;
+    }
+
+    [data-ram="dx-prog"] {
+      height: 3px;
+      background: rgba(191,195,199,.18);
+      overflow: hidden;
+    }
+    [data-ram="dx-bar"] {
+      height: 100%;
+      width: 100%;
+      background: #F10600;
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+  }
+
+  /* Hasta 860px no hay sticky: desplazamiento lateral con snap, que en
+     táctil se entiende solo y no secuestra el scroll de la página. */
+  @media (max-width: 860px) {
+    [data-ram="dx-track"] {
+      display: flex !important;
+      grid-template-columns: none !important;
+      gap: 14px !important;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+    }
+    [data-ram="dx-track"] > button {
+      min-width: 78vw;
+      scroll-snap-align: start;
+      min-height: 420px !important;
+    }
+    [data-ram="dx-prog"] { display: none; }
+  }
+
   /* ============================================================
      CAPA RESPONSIVE
      Los estilos del sitio son inline, por eso acá se usa !important.
@@ -202,7 +286,7 @@
 </style>
 </helmet>
 
-<div style="background:#0A0A0A;overflow-x:hidden">
+<div style="background:#0A0A0A;overflow-x:hidden;overflow-x:clip">
 
   <header id="ram-header" style="position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px;background:linear-gradient(180deg,rgba(10,10,10,.92),rgba(10,10,10,0));backdrop-filter:blur(2px);transition:background .35s ease,padding .35s ease,border-color .35s ease;border-bottom:1px solid rgba(191,195,199,0)">
     <a href="#inicio" onClick="{{ goInicio }}" style="display:flex;align-items:center;gap:12px;flex:0 0 auto">
@@ -303,7 +387,9 @@
         <p style="margin:0;max-width:40ch;font-size:16px;line-height:1.6;color:#BFC3C7">Clases para niños, jóvenes y adultos, separadas por nivel y por edad. Si nunca entrenaste, empezás en principiantes — sin apuro y sin exigencia de competencia.</p>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
+      <div data-ram="dx">
+      <div data-ram="dx-sticky">
+      <div data-ram="dx-track" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
       <sc-for list="{{ disciplinas }}" as="d" hint-placeholder-count="6">
         <button type="button" onClick="{{ d.open }}" data-reveal style="opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s ease;position:relative;min-height:440px;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;overflow:hidden;background:#0A0A0A;border:1px solid rgba(191,195,199,.12);text-align:left;cursor:pointer;color:#F5F5F5;font-family:inherit" style-hover="border-color:rgba(241,6,0,.65)">
           <img src="{{ d.img }}" alt="{{ d.titulo }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.4) brightness(.5);transition:transform .8s ease,filter .8s ease" style-hover="transform:scale(1.07);filter:grayscale(.1) brightness(.6)" />
@@ -311,11 +397,16 @@
           <div style="position:relative">
             <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;color:#F10600;text-transform:uppercase">{{ d.kicker }}</div>
             <h3 style="margin:12px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:26px;line-height:1.05;text-transform:uppercase">{{ d.titulo }}</h3>
-            <p style="margin:14px 0 0;font-size:15px;line-height:1.55;color:#BFC3C7">{{ d.resumen }}</p>
-            <div style="margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Ver disciplina →</div>
+            <div data-ram="dx-rev">
+              <p style="margin:14px 0 0;font-size:15px;line-height:1.55;color:#BFC3C7">{{ d.resumen }}</p>
+              <div style="margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Ver disciplina →</div>
+            </div>
           </div>
         </button>
       </sc-for>
+      </div>
+      <div data-ram="dx-prog"><div data-ram="dx-bar"></div></div>
+      </div>
       </div>
     </div>
   </section>

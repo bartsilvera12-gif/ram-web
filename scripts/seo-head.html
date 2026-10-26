@@ -51,3 +51,60 @@
   setTimeout(setHeaderHeight, 300);
 })();
 </script>
+<script>
+(function () {
+  // Disciplinas: convierte el scroll vertical sobre la seccion en
+  // desplazamiento horizontal del track.
+  // El runtime vuelve a montar el DOM, asi que no se cachea nada en los
+  // nodos (se perderia): todo se recalcula por frame, que es barato.
+  var MOBILE = 860;
+  var raf = null;
+
+  function pintar() {
+    raf = null;
+    var wrap = document.querySelector('[data-ram="dx"]');
+    if (!wrap) return;
+    var track = wrap.querySelector('[data-ram="dx-track"]');
+    var sticky = wrap.querySelector('[data-ram="dx-sticky"]');
+    if (!track || !sticky) return;
+
+    if (window.innerWidth <= MOBILE) {
+      if (wrap.style.height) wrap.style.height = '';
+      if (track.style.transform) track.style.transform = '';
+      return;
+    }
+
+    var recorrido = track.scrollWidth - sticky.clientWidth;
+    if (recorrido < 0) recorrido = 0;
+
+    // alto = una pantalla pegada + lo que falte recorrer de costado
+    var alto = (window.innerHeight + recorrido) + 'px';
+    if (wrap.style.height !== alto) wrap.style.height = alto;
+    if (!recorrido) return;
+
+    var total = wrap.offsetHeight - window.innerHeight;
+    var p = total > 0 ? (-wrap.getBoundingClientRect().top / total) : 0;
+    p = p < 0 ? 0 : (p > 1 ? 1 : p);
+
+    track.style.transform = 'translate3d(' + (-p * recorrido).toFixed(1) + 'px,0,0)';
+    var bar = wrap.querySelector('[data-ram="dx-bar"]');
+    if (bar) bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+  }
+
+  function pedir() { if (!raf) raf = requestAnimationFrame(pintar); }
+
+  window.addEventListener('scroll', pedir, { passive: true });
+  window.addEventListener('resize', pedir);
+  window.addEventListener('load', pedir);
+
+  // El runtime compila con Babel y monta bastante despues del load, y vuelve
+  // a montar al cambiar de pagina. Se observa el DOM en vez de adivinar.
+  var pendiente = null;
+  if (window.MutationObserver) {
+    new MutationObserver(function () {
+      if (pendiente) return;
+      pendiente = setTimeout(function () { pendiente = null; pedir(); }, 120);
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+})();
+</script>
