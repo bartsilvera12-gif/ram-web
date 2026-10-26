@@ -3,6 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="config.js"></script>
+<script>
+(function () {
+  // Trae el contenido editable desde Supabase y lo deja en window.RAM_DATOS.
+  // Si no hay configuracion, o la consulta falla, el sitio sigue mostrando el
+  // contenido que trae escrito: nunca queda en blanco por culpa de la base.
+  var C = window.RAM_CONFIG;
+  if (!C || !C.SUPABASE_URL || /TU-SUPABASE|TU_ANON_KEY/.test(C.SUPABASE_URL + C.SUPABASE_ANON_KEY)) return;
+
+  var base = String(C.SUPABASE_URL).replace(/\/+$/, '') + '/rest/v1/';
+  var cabeceras = {
+    apikey: C.SUPABASE_ANON_KEY,
+    Authorization: 'Bearer ' + C.SUPABASE_ANON_KEY,
+    'Accept-Profile': C.SCHEMA || 'ram'
+  };
+
+  function tabla(nombre, consulta) {
+    return fetch(base + nombre + consulta, { headers: cabeceras })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .catch(function () { return []; });
+  }
+
+  var activos = '?select=*&activo=is.true&order=orden.asc';
+  Promise.all([
+    tabla('disciplinas', activos),
+    tabla('horarios', activos),
+    tabla('galeria', activos),
+    tabla('beneficios', activos),
+    tabla('instructores', activos),
+    tabla('ajustes', '?select=*'),
+    tabla('disciplina_instructores', '?select=*&order=orden.asc')
+  ]).then(function (r) {
+    var aj = {};
+    (r[5] || []).forEach(function (a) { aj[a.clave] = a.valor; });
+    window.RAM_DATOS = {
+      disciplinas: r[0] || [], horarios: r[1] || [], galeria: r[2] || [],
+      beneficios: r[3] || [], instructores: r[4] || [], ajustes: aj,
+      vinculos: r[6] || []
+    };
+    window.dispatchEvent(new CustomEvent('ram:datos'));
+  });
+})();
+</script>
 <title>RAM Martial Arts | Brazilian Jiu-Jitsu y Artes Marciales en Asunción</title>
 <meta name="description" content="Academia de Brazilian Jiu-Jitsu y artes marciales en Asunción, Paraguay. Técnica real, constancia y evolución personal. Agendá tu clase de prueba." />
 <meta name="theme-color" content="#0A0A0A" />
@@ -419,7 +462,7 @@
 
   <sc-if value="{{ pInicio }}" hint-placeholder-val="{{ true }}">
   <section id="inicio" data-screen-label="Hero" style="position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:150px 0 0;overflow:hidden;background:#0A0A0A">
-    <div style="position:absolute;inset:0;background-image:url('uploads/_MG_7132%20(1).JPG.jpeg');background-size:cover;background-position:60% 40%;filter:grayscale(.35) contrast(1.08) brightness(.5)"></div>
+    <img src="{{ heroImg }}" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 40%;filter:grayscale(.35) contrast(1.08) brightness(.5)" />
     <div data-ram="hero-ov" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,10,.9) 0%,rgba(10,10,10,.6) 45%,rgba(10,10,10,.25) 100%)"></div>
     <div style="position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(180deg,rgba(10,10,10,0),rgba(10,10,10,.85))"></div>
 
@@ -465,7 +508,7 @@
   <section id="nosotros" data-screen-label="Sobre RAM" style="position:relative;padding:clamp(80px,9vw,140px) 28px;background:#0A0A0A">
     <div data-ram-grid="split2" style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:clamp(32px,5vw,80px);align-items:center">
       <div data-reveal style="opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease;position:relative">
-        <img src="uploads/_MG_7018.JPG.jpeg" alt="Equipo RAM Martial Arts" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
+        <img src="{{ nosotrosImg }}" alt="Equipo RAM Martial Arts" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
         <div style="position:absolute;right:-16px;bottom:-16px;width:58%;background:#F10600;padding:20px 22px">
           <div style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(16px,1.6vw,22px);line-height:1.1;text-transform:uppercase;color:#fff">Técnica antes que fuerza</div>
         </div>
@@ -473,8 +516,8 @@
       <div data-reveal style="opacity:0;transform:translateY(28px);transition:opacity .9s .1s ease,transform .9s .1s ease">
         <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Sobre RAM</span>
         <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Más que una academia,<br />una mentalidad.</h2>
-        <p style="margin:24px 0 0;font-size:17px;line-height:1.7;color:#BFC3C7;max-width:54ch">RAM Martial Arts nació con una idea simple: enseñar artes marciales de verdad, con método, seguridad y acompañamiento real. Cada clase tiene estructura — calentamiento, técnica, drills y práctica — para que progreses sin importar desde dónde arranques.</p>
-        <p style="margin:16px 0 0;font-size:17px;line-height:1.7;color:#BFC3C7;max-width:54ch">Trabajamos con niños, adolescentes y adultos. Desde el primer día estás en el tatami, con instructores que corrigen y compañeros que cuidan.</p>
+        <p style="margin:24px 0 0;font-size:17px;line-height:1.7;color:#BFC3C7;max-width:54ch">{{ nosotrosP1 }}</p>
+        <p style="margin:16px 0 0;font-size:17px;line-height:1.7;color:#BFC3C7;max-width:54ch">{{ nosotrosP2 }}</p>
         <div data-ram-grid="two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin-top:40px;background:rgba(191,195,199,.16)">
           <div style="background:#0A0A0A;padding:22px 20px"><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.02em">Disciplina</div><div style="margin-top:8px;font-size:14px;color:#BFC3C7;line-height:1.55">Presentarse, aunque no haya ganas. Ahí empieza todo.</div></div>
           <div style="background:#0A0A0A;padding:22px 20px"><div style="font-family:Poppins,sans-serif;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.02em">Respeto</div><div style="margin-top:8px;font-size:14px;color:#BFC3C7;line-height:1.55">Al compañero, al profesor y al proceso de cada uno.</div></div>
@@ -540,35 +583,12 @@
           <div style="background:#141414;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Hora</div>
           <div style="background:#141414;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Nivel</div>
 
-          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">BJJ Adultos</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Lun · Mié · Vie</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">19:00 – 20:30</div>
-          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#F10600">Todos</span></div>
-
-          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">BJJ Principiantes</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">19:00 – 20:00</div>
-          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Inicial</span></div>
-
-          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">No-Gi</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">20:00 – 21:30</div>
-          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Intermedio</span></div>
-
-          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">Artes marciales / MMA</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Lun · Mié</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">20:30 – 22:00</div>
-          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Avanzado</span></div>
-
-          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">Kids 4–8</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">17:00 – 17:45</div>
-          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Infantil</span></div>
-
-          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">Kids 9–14</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">Mar · Jue</div>
-          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">18:00 – 19:00</div>
-          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">Juvenil</span></div>
+          <sc-for list="{{ horarios }}" as="h" hint-placeholder-count="6">
+          <div style="background:#0A0A0A;padding:20px;font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase">{{ h.clase }}</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#BFC3C7">{{ h.dias }}</div>
+          <div style="background:#0A0A0A;padding:20px;font-size:15px;color:#F5F5F5;font-weight:600">{{ h.hora }}</div>
+          <div style="background:#0A0A0A;padding:20px"><span style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#BFC3C7">{{ h.nivel }}</span></div>
+        </sc-for>
         </div>
       </div>
       <p style="margin:18px 0 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:#BFC3C7">* Horarios de referencia — confirmá disponibilidad por WhatsApp antes de tu primera clase.</p>
@@ -598,41 +618,25 @@
     <div style="position:absolute;right:-10%;top:-20%;width:46vw;height:46vw;border-radius:50%;background:radial-gradient(circle,rgba(241,6,0,.14),rgba(241,6,0,0) 65%)"></div>
     <div style="position:relative;max-width:1320px;margin:0 auto">
       <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;text-align:center;max-width:52ch;margin:0 auto">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Por qué RAM</span>
-        <h2 style="margin:16px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(28px,3.2vw,48px);line-height:.98;letter-spacing:-.02em;text-transform:uppercase">Lo que te llevás del tatami</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">{{ porqueKicker }}</span>
+        <h2 style="margin:16px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(28px,3.2vw,48px);line-height:.98;letter-spacing:-.02em;text-transform:uppercase">{{ porqueTitulo }}</h2>
         <div style="width:64px;height:3px;background:#F10600;margin:20px auto 0"></div>
       </div>
       <div data-ram-grid="three" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr) minmax(0,1fr);gap:clamp(24px,3.2vw,56px);align-items:center;margin-top:clamp(36px,4vw,64px)">
         <div style="display:grid;gap:clamp(24px,2.4vw,38px);text-align:right">
-          <div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0s cubic-bezier(.2,.7,.2,1),transform .9s 0s ease">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Técnica real</h3>
-            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Nada de coreografía: posiciones que funcionan bajo presión, enseñadas paso a paso.</p>
-          </div>
-          <div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0.06s cubic-bezier(.2,.7,.2,1),transform .9s 0.06s ease">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Estado físico</h3>
-            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Fuerza funcional, movilidad y resistencia, sin pasar horas mirando el reloj del gimnasio.</p>
-          </div>
-          <div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0.12s cubic-bezier(.2,.7,.2,1),transform .9s 0.12s ease">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Defensa personal</h3>
-            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Saber controlar una situación y salir de ella. Confianza que se nota afuera del tatami.</p>
-          </div>
+          <sc-for list="{{ benA }}" as="b" hint-placeholder-count="3"><div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0s cubic-bezier(.2,.7,.2,1),transform .9s 0s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">{{ b.titulo }}</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">{{ b.texto }}</p>
+          </div></sc-for>
         </div>
         <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s .1s ease,transform .9s .1s ease;position:relative">
-          <img src="uploads/_MG_7043.JPG.jpeg" alt="Entrenamiento de jiu-jitsu en RAM" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;filter:contrast(1.06)" />
+          <img src="{{ porqueImg }}" alt="Entrenamiento de jiu-jitsu en RAM" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;filter:contrast(1.06)" />
         </div>
         <div style="display:grid;gap:clamp(24px,2.4vw,38px)">
-          <div data-reveal style="opacity:0;transform:translate(44px,12px);transition:opacity .9s 0.06s cubic-bezier(.2,.7,.2,1),transform .9s 0.06s ease">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Cabeza fría</h3>
-            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Disciplina mental, manejo de la frustración y foco. El jiu-jitsu enseña a perder bien.</p>
-          </div>
-          <div data-reveal style="opacity:0;transform:translate(44px,12px);transition:opacity .9s 0.12s cubic-bezier(.2,.7,.2,1),transform .9s 0.12s ease">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Acompañamiento</h3>
-            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Instructores que te conocen por nombre y corrigen tu progreso, clase a clase.</p>
-          </div>
-          <div data-reveal style="opacity:0;transform:translate(44px,12px);transition:opacity .9s 0.18s cubic-bezier(.2,.7,.2,1),transform .9s 0.18s ease">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">Comunidad</h3>
-            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">Gente que te espera para entrenar. La razón número uno por la que nadie abandona.</p>
-          </div>
+          <sc-for list="{{ benB }}" as="b" hint-placeholder-count="3"><div data-reveal style="opacity:0;transform:translate(-44px,12px);transition:opacity .9s 0s cubic-bezier(.2,.7,.2,1),transform .9s 0s ease">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(19px,1.6vw,24px);text-transform:uppercase;letter-spacing:-.01em">{{ b.titulo }}</h3>
+            <p style="margin:12px 0 0;font-size:clamp(15px,1.15vw,17px);line-height:1.65;color:#BFC3C7">{{ b.texto }}</p>
+          </div></sc-for>
         </div>
       </div>
     </div>
@@ -647,18 +651,9 @@
       <div style="width:64px;height:3px;background:#F10600;margin:20px auto 0"></div>
     </div>
     <div data-ram-grid="stats" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:clamp(32px,4vw,56px)">
-      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;position:relative;display:block;overflow:hidden">
-        <img src="uploads/_MG_6990.JPG.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
-      </a>
-      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .06s ease,transform .8s .06s ease;position:relative;display:block;overflow:hidden">
-        <img src="uploads/_MG_7086%20(1).JPG.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
-      </a>
-      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .12s ease,transform .8s .12s ease;position:relative;display:block;overflow:hidden">
-        <img src="uploads/_MG_7102.JPG.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
-      </a>
-      <a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s .18s ease,transform .8s .18s ease;position:relative;display:block;overflow:hidden">
-        <img src="uploads/IMG_9774.jpg.jpeg" alt="Entrenamiento RAM" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
-      </a>
+      <sc-for list="{{ destacadas }}" as="g" hint-placeholder-count="4"><a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;position:relative;display:block;overflow:hidden">
+        <img src="{{ g.src }}" alt="{{ g.alt }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
+      </a></sc-for>
     </div>
     <div style="display:flex;justify-content:center;padding:clamp(32px,4vw,52px) 28px 0">
       <a href="#galeria" onClick="{{ goGaleria }}" style="padding:16px 34px;background:#F10600;color:#fff;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)" style-hover="background:#A30000">Ver toda la galería</a>
@@ -676,7 +671,7 @@
       </div>
       <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .8s .16s ease,transform .8s .16s ease">
         <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(17px,1.4vw,21px);text-transform:uppercase">Contacto</h3>
-        <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">Sucre 1124 entre Bulnes y Mautín · Villa Morra, Asunción<br />WhatsApp · (0981) 105-384<br />ram.romero81@gmail.com</p>
+        <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">{{ direccion }}<br />WhatsApp · {{ waVisible }}<br />{{ email }}</p>
         <a href="#contacto" onClick="{{ goContacto }}" style="display:inline-block;margin-top:18px;padding:11px 24px;background:#F10600;color:#fff;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000">Escribinos</a>
       </div>
     </div>
@@ -737,30 +732,16 @@
         <p style="margin:0;max-width:40ch;font-size:16px;line-height:1.6;color:#BFC3C7">Equipo con formación en jiu-jitsu y artes marciales, enfocado en corregir técnica alumno por alumno.</p>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+        <sc-for list="{{ profes }}" as="p" hint-placeholder-count="3">
         <article data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s 0s cubic-bezier(.2,.7,.2,1),transform .9s 0s ease;background:#121212;border:1px solid rgba(191,195,199,.14)" style-hover="border-color:rgba(191,195,199,.4)">
-          <img src="uploads/_MG_7022.JPG.jpeg" alt="Entrenamiento en RAM Martial Arts" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
+          <img src="{{ p.img }}" alt="Entrenamiento en RAM Martial Arts" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
           <div style="padding:28px 26px">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.15">Clases de adultos</h3>
-            <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Brazilian Jiu-Jitsu · Gi y No-Gi</div>
-            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7">Corrección técnica alumno por alumno, con progresión clara desde principiantes hasta competencia.</p>
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.15">{{ p.nombre }}</h3>
+            <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">{{ p.ensena }}</div>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7">{{ p.bio }}</p>
           </div>
         </article>
-        <article data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s 0.08s cubic-bezier(.2,.7,.2,1),transform .9s 0.08s ease;background:#121212;border:1px solid rgba(191,195,199,.14)" style-hover="border-color:rgba(191,195,199,.4)">
-          <img src="uploads/_MG_7103.JPG.jpeg" alt="Entrenamiento en RAM Martial Arts" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
-          <div style="padding:28px 26px">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.15">Programa infantil</h3>
-            <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Kids · 4 a 14 años</div>
-            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7">Clases por edad: juego, coordinación, respeto y técnica, con seguimiento y graduaciones.</p>
-          </div>
-        </article>
-        <article data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s 0.16s cubic-bezier(.2,.7,.2,1),transform .9s 0.16s ease;background:#121212;border:1px solid rgba(191,195,199,.14)" style-hover="border-color:rgba(191,195,199,.4)">
-          <img src="uploads/_MG_7043.JPG.jpeg" alt="Entrenamiento en RAM Martial Arts" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:grayscale(.2) contrast(1.05)" />
-          <div style="padding:28px 26px">
-            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.15">Artes marciales y defensa personal</h3>
-            <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Striking · Acondicionamiento</div>
-            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7">Golpeo, defensa personal y trabajo físico aplicado, siempre con equipo y supervisión.</p>
-          </div>
-        </article>
+        </sc-for>
       </div>
     </div>
   </section>
@@ -794,9 +775,22 @@
 
       <aside style="display:grid;gap:1px;background:rgba(191,195,199,.16);border:1px solid rgba(191,195,199,.16)">
         <div style="background:#121212;padding:28px 26px">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Instructor a cargo</div>
-          <div style="margin-top:14px;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">{{ dSel.instructor }}</div>
-          <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">{{ dSel.instructorBio }}</p>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Instructores</div>
+          <sc-if value="{{ dSel.tieneProfes }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ dSel.profes }}" as="pr" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:13px;margin-top:16px">
+              <img src="{{ pr.img }}" alt="{{ pr.nombre }}" style="width:52px;height:52px;object-fit:cover;flex:0 0 auto;filter:grayscale(.3)" />
+              <div style="min-width:0">
+                <div style="font-family:Poppins,sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;line-height:1.2">{{ pr.nombre }}</div>
+                <div style="margin-top:3px;font-size:13px;color:#BFC3C7">{{ pr.ensena }}</div>
+              </div>
+            </div>
+          </sc-for>
+          </sc-if>
+          <sc-if value="{{ dSel.sinProfes }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:14px;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">{{ dSel.instructor }}</div>
+            <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:#BFC3C7">{{ dSel.instructorBio }}</p>
+          </sc-if>
         </div>
         <div style="background:#121212;padding:28px 26px">
           <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Para quién es</div>
@@ -838,7 +832,7 @@
       <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Las inscripciones de menores las gestiona siempre una madre, padre o tutor, que autoriza el tratamiento de los datos y el uso de imágenes de la clase.</p>
 
       <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">6. Tus derechos</h2>
-      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Podés pedirnos en cualquier momento acceder, corregir o eliminar tus datos escribiendo a <a href="mailto:ram.romero81@gmail.com" style="color:#F10600">ram.romero81@gmail.com</a>. Respondemos dentro de los 10 días hábiles.</p>
+      <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Podés pedirnos en cualquier momento acceder, corregir o eliminar tus datos escribiendo a <a href="{{ emailHref }}" style="color:#F10600">{{ email }}</a>. Respondemos dentro de los 10 días hábiles.</p>
 
       <h2 style="margin:36px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;text-transform:uppercase">7. Cambios</h2>
       <p style="margin:12px 0 0;font-size:16px;line-height:1.75;color:#BFC3C7">Si actualizamos esta política, publicamos la nueva versión en esta misma página con su fecha de actualización.</p>
@@ -871,21 +865,21 @@
         <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Hablemos</h2>
         <p style="margin:22px 0 0;max-width:46ch;font-size:17px;line-height:1.7;color:#BFC3C7">Contanos tu experiencia previa (si la tenés) y qué horario te queda cómodo. Te respondemos con las opciones disponibles.</p>
         <div style="display:grid;gap:1px;margin-top:40px;background:rgba(191,195,199,.16)">
-          <a href="mailto:ram.romero81@gmail.com" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
+          <a href="{{ emailHref }}" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
             <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Correo</span>
-            <span style="font-size:17px;font-weight:600">ram.romero81@gmail.com</span>
+            <span style="font-size:17px;font-weight:600">{{ email }}</span>
           </a>
-          <a href="https://www.instagram.com/rammartial" target="_blank" rel="noopener" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
+          <a href="{{ instagramUrl }}" target="_blank" rel="noopener" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
             <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Instagram</span>
-            <span style="font-size:17px;font-weight:600">@rammartial</span>
+            <span style="font-size:17px;font-weight:600">{{ instagramUsuario }}</span>
           </a>
           <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px" style-hover="background:#0A0A0A;color:#F5F5F5">
             <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">WhatsApp</span>
-            <span style="font-size:17px;font-weight:600">(0981) 105-384</span>
+            <span style="font-size:17px;font-weight:600">{{ waVisible }}</span>
           </a>
           <div style="background:#121212;padding:20px 22px;display:flex;flex-direction:column;gap:6px">
             <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#BFC3C7">Ubicación</span>
-            <span style="font-size:17px;font-weight:600;color:#BFC3C7">Sucre 1124 entre Bulnes y Mautín · Villa Morra, Asunción</span>
+            <span style="font-size:17px;font-weight:600;color:#BFC3C7">{{ direccion }}</span>
           </div>
         </div>
       </div>
@@ -942,8 +936,8 @@
       </nav>
       <nav style="display:grid;gap:10px">
         <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#F10600">Contacto</span>
-        <a href="mailto:ram.romero81@gmail.com" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">ram.romero81@gmail.com</a>
-        <a href="https://www.instagram.com/rammartial" target="_blank" rel="noopener" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Instagram</a>
+        <a href="{{ emailHref }}" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">{{ email }}</a>
+        <a href="{{ instagramUrl }}" target="_blank" rel="noopener" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">Instagram</a>
         <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="font-size:15px;color:#BFC3C7" style-hover="color:#F5F5F5">WhatsApp</a>
       </nav>
       <div style="display:grid;gap:10px">
@@ -977,7 +971,22 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;595981105384&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contacto&quot;}}">
 class Component extends DCLogic {
-  state = { sent: false, page: 'inicio', lb: -1, disc: 'bjj' };
+  state = { sent: false, page: 'inicio', lb: -1, disc: 'bjj', datos: window.RAM_DATOS || null };
+
+  // Contenido editable desde el panel. Si todavia no llego (o no hay Supabase
+  // configurado) devuelve null y cada seccion cae en lo que trae escrito.
+  D() { return this.state.datos || window.RAM_DATOS || null; }
+  aj(clave, porDefecto) {
+    const d = this.D();
+    const v = d && d.ajustes ? d.ajustes[clave] : null;
+    return (v === null || v === undefined || v === '') ? porDefecto : v;
+  }
+  // Las imagenes pueden ser una URL del Storage o una ruta del sitio.
+  static ruta(v) {
+    v = String(v == null ? '' : v);
+    if (/^https?:\/\//i.test(v)) return v;
+    return v.split('/').map(encodeURIComponent).join('/');
+  }
 
   go(page) {
     return (e) => {
@@ -1001,6 +1010,11 @@ class Component extends DCLogic {
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     this._onScroll = onScroll;
+
+    // El contenido de Supabase llega despues del primer render
+    this._onDatos = () => this.setState({ datos: window.RAM_DATOS });
+    window.addEventListener('ram:datos', this._onDatos);
+    if (window.RAM_DATOS && !this.state.datos) this._onDatos();
 
     this._onKey = (e) => {
       if (this.state.lb < 0) return;
@@ -1054,6 +1068,7 @@ class Component extends DCLogic {
 
   componentWillUnmount() {
     if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
+    if (this._onDatos) window.removeEventListener('ram:datos', this._onDatos);
     if (this._io) this._io.disconnect();
     if (this._mo) this._mo.disconnect();
     clearTimeout(this._safety);
@@ -1182,27 +1197,98 @@ class Component extends DCLogic {
     }
   ];
 
+  // Disciplinas del panel, normalizadas al formato que espera la plantilla.
+  discs() {
+    const d = this.D();
+    if (!d || !d.disciplinas || !d.disciplinas.length) return Component.DISC;
+    const profes = d.instructores || [];
+    const vinculos = d.vinculos || [];
+    return d.disciplinas.map((x) => ({
+      key: x.slug,
+      kicker: x.kicker,
+      titulo: x.titulo,
+      img: x.img,
+      resumen: x.resumen,
+      lore: x.lore || [],
+      puntos: x.puntos || [],
+      paraQuien: x.para_quien,
+      equipo: x.equipo,
+      instructor: '',
+      instructorBio: '',
+      profes: vinculos
+        .filter((v) => v.disciplina_id === x.id)
+        .map((v) => profes.find((p) => p.id === v.instructor_id))
+        .filter(Boolean)
+        .map((p) => ({ nombre: p.nombre, ensena: p.ensena, img: Component.ruta(p.img) }))
+    }));
+  }
+
+  fotos() {
+    const d = this.D();
+    if (d && d.galeria && d.galeria.length) {
+      return d.galeria.map((g) => [Component.ruta(g.img), g.alt || '']);
+    }
+    return Component.SHOTS.map((sh) => ['uploads/' + encodeURIComponent(sh[0]), sh[1]]);
+  }
+
+  static DESTACADAS = [
+    ['_MG_6990.JPG.jpeg', 'Entrenamiento RAM'],
+    ['_MG_7086 (1).JPG.jpeg', 'Entrenamiento RAM'],
+    ['_MG_7102.JPG.jpeg', 'Entrenamiento RAM'],
+    ['IMG_9774.jpg.jpeg', 'Entrenamiento RAM']
+  ];
+
+  static NOSOTROS = [
+    'RAM Martial Arts naci\u00f3 con una idea simple: ense\u00f1ar artes marciales de verdad, con m\u00e9todo, seguridad y acompa\u00f1amiento real. Cada clase tiene estructura \u2014 calentamiento, t\u00e9cnica, drills y pr\u00e1ctica \u2014 para que progreses sin importar desde d\u00f3nde arranques.',
+    'Trabajamos con ni\u00f1os, adolescentes y adultos. Desde el primer d\u00eda est\u00e1s en el tatami, con instructores que corrigen y compa\u00f1eros que cuidan.'
+  ];
+
+  // Respaldo: lo que se muestra si Supabase no esta configurado o no responde.
+  static HORARIOS = [
+    { clase: 'BJJ Adultos', dias: 'Lun · Mié · Vie', hora: '19:00 – 20:30', nivel: 'Todos' },
+    { clase: 'BJJ Principiantes', dias: 'Mar · Jue', hora: '19:00 – 20:00', nivel: 'Inicial' },
+    { clase: 'No-Gi', dias: 'Mar · Jue', hora: '20:00 – 21:30', nivel: 'Intermedio' },
+    { clase: 'Artes marciales / MMA', dias: 'Lun · Mié', hora: '20:30 – 22:00', nivel: 'Avanzado' },
+    { clase: 'Kids 4–8', dias: 'Mar · Jue', hora: '17:00 – 17:45', nivel: 'Infantil' },
+    { clase: 'Kids 9–14', dias: 'Mar · Jue', hora: '18:00 – 19:00', nivel: 'Juvenil' }
+  ];
+
+  static BENEFICIOS = [
+    { titulo: 'Técnica real', texto: 'Nada de coreografía: posiciones que funcionan bajo presión, enseñadas paso a paso.' },
+    { titulo: 'Estado físico', texto: 'Fuerza funcional, movilidad y resistencia, sin pasar horas mirando el reloj del gimnasio.' },
+    { titulo: 'Defensa personal', texto: 'Saber controlar una situación y salir de ella. Confianza que se nota afuera del tatami.' },
+    { titulo: 'Cabeza fría', texto: 'Disciplina mental, manejo de la frustración y foco. El jiu-jitsu enseña a perder bien.' },
+    { titulo: 'Acompañamiento', texto: 'Instructores que te conocen por nombre y corrigen tu progreso, clase a clase.' },
+    { titulo: 'Comunidad', texto: 'Gente que te espera para entrenar. La razón número uno por la que nadie abandona.' }
+  ];
+
+  static PROFES = [
+    { nombre: 'Clases de adultos', ensena: 'Brazilian Jiu-Jitsu · Gi y No-Gi', bio: 'Corrección técnica alumno por alumno, con progresión clara desde principiantes hasta competencia.', img: 'uploads/_MG_7022.JPG.jpeg' },
+    { nombre: 'Programa infantil', ensena: 'Kids · 4 a 14 años', bio: 'Clases por edad: juego, coordinación, respeto y técnica, con seguimiento y graduaciones.', img: 'uploads/_MG_7103.JPG.jpeg' },
+    { nombre: 'Artes marciales y defensa personal', ensena: 'Striking · Acondicionamiento', bio: 'Golpeo, defensa personal y trabajo físico aplicado, siempre con equipo y supervisión.', img: 'uploads/_MG_7043.JPG.jpeg' }
+  ];
+
   lbMove(step) {
     this.setState((st) => {
-      const n = Component.SHOTS.length;
+      const n = this.fotos().length;
       return { lb: ((st.lb + step) % n + n) % n };
     });
   }
 
   renderVals() {
-    const num = String(this.props.whatsappNumber ?? '595981105384').replace(/[^0-9]/g, '');
+    const num = String(this.aj('whatsapp', this.props.whatsappNumber ?? '595981105384')).replace(/[^0-9]/g, '');
     const p = this.state.page;
     const i = this.state.lb;
-    const shots = Component.SHOTS;
-    const cur = shots[i] || shots[0];
+    const shots = this.fotos();
+    const cur = shots[i] || shots[0] || ['', ''];
     return {
       gallery: shots.map((sh, idx) => ({
-        src: 'uploads/' + encodeURIComponent(sh[0]),
+        src: sh[0],
         alt: sh[1],
         open: () => this.setState({ lb: idx })
       })),
       lbOpen: i >= 0,
-      lbSrc: 'uploads/' + encodeURIComponent(cur[0]),
+      lbSrc: cur[0],
       lbAlt: cur[1],
       lbCounter: (i + 1) + ' / ' + shots.length,
       lbClose: (e) => { if (!e || e.target === e.currentTarget || (e.currentTarget && e.currentTarget.tagName === 'BUTTON')) this.setState({ lb: -1 }); },
@@ -1217,14 +1303,16 @@ class Component extends DCLogic {
       pContacto: p === 'contacto',
       pPrivacidad: p === 'privacidad',
       pDisciplina: p === 'disciplina',
-      disciplinas: Component.DISC.map((d) => ({
+      disciplinas: this.discs().map((d) => ({
         ...d,
-        img: d.img.replace(/ /g, '%20'),
+        img: Component.ruta(d.img),
         open: () => { this.setState({ page: 'disciplina', disc: d.key }); window.scrollTo({ top: 0, behavior: 'auto' }); }
       })),
       dSel: (() => {
-        const d = Component.DISC.find((x) => x.key === this.state.disc) || Component.DISC[0];
-        return { ...d, img: d.img.replace(/ /g, '%20') };
+        const todas = this.discs();
+        const d = todas.find((x) => x.key === this.state.disc) || todas[0] || {};
+        const pf = d.profes || [];
+        return { ...d, img: Component.ruta(d.img), profes: pf, tieneProfes: pf.length > 0, sinProfes: pf.length === 0 };
       })(),
       pCta: p === 'inicio' || p === 'instructores' || p === 'galeria',
       goInicio: this.go('inicio'),
@@ -1235,6 +1323,47 @@ class Component extends DCLogic {
       goInstructores: this.go('instructores'),
       goContacto: this.go('contacto'),
       goPrivacidad: this.go('privacidad'),
+      // ---- contenido editable desde el panel (con respaldo escrito) ----
+      horarios: (() => {
+        const d = this.D();
+        return (d && d.horarios && d.horarios.length) ? d.horarios : Component.HORARIOS;
+      })(),
+      benA: (() => {
+        const d = this.D();
+        const b = (d && d.beneficios && d.beneficios.length) ? d.beneficios : Component.BENEFICIOS;
+        return b.slice(0, Math.ceil(b.length / 2));
+      })(),
+      benB: (() => {
+        const d = this.D();
+        const b = (d && d.beneficios && d.beneficios.length) ? d.beneficios : Component.BENEFICIOS;
+        return b.slice(Math.ceil(b.length / 2));
+      })(),
+      profes: (() => {
+        const d = this.D();
+        const l = (d && d.instructores && d.instructores.length) ? d.instructores : Component.PROFES;
+        return l.map((p) => ({ ...p, img: Component.ruta(p.img) }));
+      })(),
+      destacadas: (() => {
+        const d = this.D();
+        const g = d && d.galeria ? d.galeria.filter((x) => x.destacada) : [];
+        const l = g.length
+          ? g.slice(0, 4).map((x) => ({ src: Component.ruta(x.img), alt: x.alt || 'Entrenamiento RAM' }))
+          : Component.DESTACADAS.map((x) => ({ src: 'uploads/' + encodeURIComponent(x[0]), alt: x[1] }));
+        return l;
+      })(),
+      heroImg: Component.ruta(this.aj('hero_img', 'uploads/_MG_7132 (1).JPG.jpeg')),
+      porqueKicker: this.aj('porque_kicker', 'Por qu\u00e9 RAM'),
+      porqueTitulo: this.aj('porque_titulo', 'Lo que te llev\u00e1s del tatami'),
+      porqueImg: Component.ruta(this.aj('porque_img', 'uploads/_MG_7043.JPG.jpeg')),
+      nosotrosImg: Component.ruta(this.aj('nosotros_img', 'uploads/_MG_7018.JPG.jpeg')),
+      nosotrosP1: this.aj('nosotros_p1', Component.NOSOTROS[0]),
+      nosotrosP2: this.aj('nosotros_p2', Component.NOSOTROS[1]),
+      email: this.aj('email', 'ram.romero81@gmail.com'),
+      emailHref: 'mailto:' + this.aj('email', 'ram.romero81@gmail.com'),
+      instagramUrl: this.aj('instagram_url', 'https://www.instagram.com/rammartial'),
+      instagramUsuario: this.aj('instagram_usuario', '@rammartial'),
+      direccion: this.aj('direccion', 'Sucre 1124 entre Bulnes y Maut\u00edn \u00b7 Villa Morra, Asunci\u00f3n'),
+      waVisible: this.aj('whatsapp_visible', '(0981) 105-384'),
       sent: this.state.sent,
       whatsappUrl: 'https://wa.me/' + num,
       onSubmit: (e) => {

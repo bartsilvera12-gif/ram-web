@@ -1,4 +1,6 @@
 *.dc.html
 .thumbnail
 DEPLOY.md
+ADMIN.md
 scripts
+supabase

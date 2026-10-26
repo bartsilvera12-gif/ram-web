@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel · RAM Martial Arts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rojo: #F10600;
+    --rojo-hover: #A30000;
+    --negro: #0A0A0A;
+    --panel: #141414;
+    --panel-2: #1C1C1C;
+    --borde: rgba(191,195,199,.18);
+    --texto: #F5F5F5;
+    --apagado: #BFC3C7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--negro); color: var(--texto);
+    font-family: Poppins, system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  }
+  button, input, textarea, select { font-family: inherit; font-size: 14px; }
+  a { color: var(--rojo); }
+
+  /* ---------- estructura ---------- */
+  .cargando {
+    position: fixed; inset: 0; display: grid; place-content: center;
+    background: var(--negro); z-index: 500; gap: 14px; text-align: center;
+  }
+  .oculto { display: none !important; }
+
+  header.barra {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 22px; background: var(--panel); border-bottom: 1px solid var(--borde);
+  }
+  .marca { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.01em; }
+  .marca span { color: var(--rojo); }
+
+  nav.tabs {
+    display: flex; gap: 4px; padding: 0 14px; background: var(--panel);
+    border-bottom: 1px solid var(--borde); overflow-x: auto;
+    position: sticky; top: 61px; z-index: 40;
+  }
+  nav.tabs button {
+    background: none; border: none; color: var(--apagado); cursor: pointer;
+    padding: 14px 16px; font-weight: 600; font-size: 12px; letter-spacing: .1em;
+    text-transform: uppercase; white-space: nowrap; border-bottom: 2px solid transparent;
+  }
+  nav.tabs button:hover { color: var(--texto); }
+  nav.tabs button[aria-selected="true"] { color: var(--texto); border-bottom-color: var(--rojo); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 28px 22px 120px; }
+  h1 { font-size: 26px; font-weight: 800; margin: 0 0 6px; text-transform: uppercase; letter-spacing: -.02em; }
+  .sub { color: var(--apagado); font-size: 14px; margin: 0 0 26px; line-height: 1.55; }
+
+  /* ---------- tarjetas y formularios ---------- */
+  .ficha {
+    background: var(--panel); border: 1px solid var(--borde);
+    padding: 20px; margin-bottom: 16px;
+  }
+  .ficha-cab {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 4px; cursor: pointer;
+  }
+  .ficha-titulo { font-weight: 700; font-size: 16px; }
+  .ficha-meta { color: var(--apagado); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+
+  label { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+          color: var(--apagado); margin: 16px 0 7px; font-family: 'JetBrains Mono', monospace; }
+  input[type=text], input[type=email], input[type=password], input[type=number], textarea, select {
+    width: 100%; background: var(--negro); border: 1px solid var(--borde);
+    color: var(--texto); padding: 11px 13px; border-radius: 0;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--rojo); }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+  .ayuda { font-size: 12px; color: var(--apagado); margin-top: 6px; line-height: 1.5; }
+
+  .fila { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0 16px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    padding: 12px 20px; background: var(--rojo); color: #fff; border: none;
+    font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--rojo-hover); }
+  .btn[disabled] { opacity: .5; cursor: progress; }
+  .btn.fantasma { background: transparent; border: 1px solid var(--borde); color: var(--texto); }
+  .btn.fantasma:hover { border-color: var(--texto); background: rgba(245,245,245,.06); }
+  .btn.peligro { background: transparent; border: 1px solid rgba(241,6,0,.5); color: var(--rojo); }
+  .btn.peligro:hover { background: rgba(241,6,0,.12); }
+  .btn.chico { padding: 8px 13px; font-size: 11px; }
+  .acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+
+  /* ---------- imágenes ---------- */
+  .img-campo { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+  .img-previa {
+    width: 128px; height: 128px; object-fit: cover; background: var(--panel-2);
+    border: 1px solid var(--borde); flex: 0 0 auto;
+  }
+  .img-controles { flex: 1 1 240px; min-width: 0; }
+
+  /* ---------- galería ---------- */
+  .galeria-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 14px;
+  }
+  .foto { background: var(--panel); border: 1px solid var(--borde); padding: 10px; }
+  .foto img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; margin-bottom: 10px; }
+  .foto.destacada { border-color: var(--rojo); }
+  .marca-destacada {
+    display: flex; align-items: center; gap: 7px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .1em; color: var(--apagado);
+    cursor: pointer; margin-bottom: 8px;
+  }
+  .foto.destacada .marca-destacada { color: var(--rojo); }
+
+  /* ---------- horarios ---------- */
+  .tabla { width: 100%; border-collapse: collapse; }
+  .tabla th {
+    text-align: left; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--apagado); padding: 10px; font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid var(--borde); font-weight: 500;
+  }
+  .tabla td { padding: 5px; border-bottom: 1px solid rgba(191,195,199,.08); }
+  .tabla input { padding: 9px 10px; }
+  .envoltorio-tabla { overflow-x: auto; }
+  .envoltorio-tabla .tabla { min-width: 680px; }
+
+  /* ---------- login ---------- */
+  .login { max-width: 380px; margin: 14vh auto; padding: 0 22px; }
+  .login .ficha { padding: 28px; }
+
+  /* ---------- avisos ---------- */
+  #avisos { position: fixed; right: 18px; bottom: 18px; z-index: 300;
+            display: flex; flex-direction: column; gap: 10px; max-width: min(420px, calc(100vw - 36px)); }
+  .aviso {
+    background: var(--panel-2); border-left: 3px solid var(--rojo);
+    padding: 13px 16px; font-size: 13px; line-height: 1.5;
+    box-shadow: 0 10px 34px rgba(0,0,0,.5);
+  }
+  .aviso.ok { border-left-color: #22C55E; }
+  .vacio { color: var(--apagado); font-size: 14px; padding: 36px 0; text-align: center; }
+  .error-arranque { max-width: 620px; margin: 12vh auto; padding: 0 22px; line-height: 1.6; }
+  .error-arranque code {
+    background: var(--panel); padding: 2px 6px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .error-arranque pre {
+    background: var(--panel); border: 1px solid var(--borde); padding: 14px;
+    overflow-x: auto; font-size: 12px; font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 640px) {
+    nav.tabs { top: 59px; }
+    main { padding: 22px 16px 110px; }
+    header.barra { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cargando" class="cargando">
+  <div style="font-weight:800;letter-spacing:.2em;text-transform:uppercase;font-size:13px">RAM</div>
+  <div style="color:var(--apagado);font-size:13px">Conectando…</div>
+</div>
+
+<!-- Pantalla de error cuando falta configuración -->
+<div id="pantalla-error" class="error-arranque oculto"></div>
+
+<!-- Login -->
+<div id="pantalla-login" class="login oculto">
+  <div class="ficha">
+    <div class="marca" style="margin-bottom:6px">RAM<span>.</span> Panel</div>
+    <p class="sub" style="margin-bottom:0">Entrá con la cuenta de administración.</p>
+    <form id="form-login">
+      <label for="correo">Correo</label>
+      <input id="correo" type="email" autocomplete="username" required>
+      <label for="clave">Contraseña</label>
+      <input id="clave" type="password" autocomplete="current-password" required>
+      <div class="acciones">
+        <button class="btn" type="submit" id="btn-entrar" style="width:100%">Entrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Panel -->
+<div id="pantalla-panel" class="oculto">
+  <header class="barra">
+    <div class="marca">RAM<span>.</span> Panel</div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span id="quien" class="ficha-meta"></span>
+      <button class="btn fantasma chico" id="btn-salir">Salir</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <main id="vista"></main>
+</div>
+
+<div id="avisos"></div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

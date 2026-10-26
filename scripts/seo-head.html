@@ -1,3 +1,46 @@
+<script src="config.js"></script>
+<script>
+(function () {
+  // Trae el contenido editable desde Supabase y lo deja en window.RAM_DATOS.
+  // Si no hay configuracion, o la consulta falla, el sitio sigue mostrando el
+  // contenido que trae escrito: nunca queda en blanco por culpa de la base.
+  var C = window.RAM_CONFIG;
+  if (!C || !C.SUPABASE_URL || /TU-SUPABASE|TU_ANON_KEY/.test(C.SUPABASE_URL + C.SUPABASE_ANON_KEY)) return;
+
+  var base = String(C.SUPABASE_URL).replace(/\/+$/, '') + '/rest/v1/';
+  var cabeceras = {
+    apikey: C.SUPABASE_ANON_KEY,
+    Authorization: 'Bearer ' + C.SUPABASE_ANON_KEY,
+    'Accept-Profile': C.SCHEMA || 'ram'
+  };
+
+  function tabla(nombre, consulta) {
+    return fetch(base + nombre + consulta, { headers: cabeceras })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .catch(function () { return []; });
+  }
+
+  var activos = '?select=*&activo=is.true&order=orden.asc';
+  Promise.all([
+    tabla('disciplinas', activos),
+    tabla('horarios', activos),
+    tabla('galeria', activos),
+    tabla('beneficios', activos),
+    tabla('instructores', activos),
+    tabla('ajustes', '?select=*'),
+    tabla('disciplina_instructores', '?select=*&order=orden.asc')
+  ]).then(function (r) {
+    var aj = {};
+    (r[5] || []).forEach(function (a) { aj[a.clave] = a.valor; });
+    window.RAM_DATOS = {
+      disciplinas: r[0] || [], horarios: r[1] || [], galeria: r[2] || [],
+      beneficios: r[3] || [], instructores: r[4] || [], ajustes: aj,
+      vinculos: r[6] || []
+    };
+    window.dispatchEvent(new CustomEvent('ram:datos'));
+  });
+})();
+</script>
 <title>RAM Martial Arts | Brazilian Jiu-Jitsu y Artes Marciales en Asunción</title>
 <meta name="description" content="Academia de Brazilian Jiu-Jitsu y artes marciales en Asunción, Paraguay. Técnica real, constancia y evolución personal. Agendá tu clase de prueba." />
 <meta name="theme-color" content="#0A0A0A" />

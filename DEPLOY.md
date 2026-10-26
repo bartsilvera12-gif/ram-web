@@ -12,9 +12,17 @@ desde unpkg en el navegador.
 | `support.js` | Runtime que interpreta el `.dc.html` |
 | `uploads/` | Imágenes |
 | `vercel.json` | Cache de assets + headers de seguridad |
+| `config.js` | Conexion a Supabase (la usan el sitio y el panel) |
+| `admin/` | Panel de administracion, en /admin |
+| `supabase/instalar.sql` | Schema `ram` + contenido inicial, para el SQL Editor |
 | `robots.txt` | Indexación abierta |
 
 `.vercelignore` excluye del deploy el `.dc.html`, `scripts/`, `.thumbnail` y este archivo.
+
+El contenido editable (disciplinas, horarios, galeria, instructores, textos y
+datos de contacto) vive en Supabase y se administra desde .
+Ver **[ADMIN.md](ADMIN.md)** para la puesta en marcha. Si Supabase no esta
+configurado o no responde, el sitio usa el contenido escrito en el HTML.
 
 ## Flujo de edición
 
