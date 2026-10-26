@@ -73,52 +73,47 @@ Decisiones que conviene conocer antes de editar:
   declaración previa para Safari anterior a 16, donde el carrusel simplemente no
   se desplaza y las tarjetas se ven en fila.
 
-## Subir a Hostinger
+## Deploy en Hostinger (por Git)
 
-Lo que va al servidor es **solo** esto, en la raiz de `public_html`:
+hPanel → **Avanzado → Git**: apuntar al repo `bartsilvera12-gif/ram-web`, rama
+`main`, directorio `public_html`.
 
-```
-public_html/
-  .htaccess
-  index.html
-  config.js
-  support.js
-  robots.txt
-  admin/        (index.html y app.js)
-  uploads/      (las fotos)
+Cada cambio es: editar, regenerar `index.html`, commit, push y desplegar desde
+hPanel (o automático, segun el plan).
+
+```bash
+node scripts/build-index.mjs
+git add -A && git commit -m "..." && git push
 ```
 
-No subas `RAM Martial Arts.dc.html`, `scripts/`, `supabase/` ni los `.md`.
-Si igual se suben, el `.htaccess` los bloquea, pero es mejor que no esten.
+> `index.html` se genera pero **se commitea**: es lo que sirve el servidor.
+> Si te olvidas de regenerarlo, el sitio queda con la version anterior aunque
+> el `.dc.html` ya tenga los cambios.
 
-**Opcion A — File Manager (lo mas simple)**
+### Lo que queda en el servidor
 
-1. hPanel → **Administrador de archivos** → entrar a `public_html`
-2. Subir el ZIP y usar **Extraer**
-3. Confirmar que `.htaccess` quedo en la raiz. El File Manager oculta los
-   archivos que empiezan con punto: activá **Mostrar archivos ocultos**
+Git clona el repo completo, asi que en `public_html` van a estar tambien el
+`.dc.html`, `scripts/`, `supabase/` con los `.sql` y el directorio `.git`.
+El `.htaccess` bloquea todo eso por HTTP; las reglas van primero, antes incluso
+del redirect a HTTPS, para que un pedido a `/.git/config` se corte ahi mismo.
 
-**Opcion B — FTP**
+**Comprobalo despues del primer deploy.** Las tres tienen que dar 403 o 404:
 
-Datos en hPanel → **Archivos → Cuentas FTP**. Subir con FileZilla a
-`public_html`, en modo binario.
+```
+https://tudominio.com/supabase/instalar.sql
+https://tudominio.com/.git/config
+https://tudominio.com/RAM%20Martial%20Arts.dc.html
+```
 
-**Opcion C — Git**
+Si alguna devuelve el archivo, el `.htaccess` no se esta aplicando: revisa que
+haya llegado a la raiz de `public_html` y que el plan permita `AllowOverride`.
 
-Si el plan lo incluye: hPanel → **Avanzado → Git**, apuntar al repo y desplegar.
-Ojo que esto sube tambien los archivos que no hacen falta; el `.htaccess` los
-bloquea igual.
+### Actualizar el dominio en los metadatos
 
-## Despues de subir
-
-1. **Verificar que el `.htaccess` se aplica.** Abrir
-   `https://tudominio.com/supabase/instalar.sql` — tiene que dar **404**.
-   Si descarga el archivo, el `.htaccess` no se subio o Apache lo esta ignorando.
-2. **Revisar el panel** en `https://tudominio.com/admin/`.
-3. **Actualizar el dominio en los metadatos.** En `scripts/seo-head.html` figura
-   `https://rammartialarts.vercel.app/` en `canonical` y `og:image`. Cambialo por
-   el dominio real, corré `node scripts/build-index.mjs` y volvé a subir
-   `index.html`. Hasta hacerlo, la vista previa al compartir por WhatsApp falla.
+En `scripts/seo-head.html` todavia figura `https://rammartialarts.vercel.app/`
+en `canonical` y `og:image`. Cambialo por el dominio real y corre
+`node scripts/build-index.mjs`. Hasta hacerlo, la vista previa al compartir el
+link por WhatsApp no muestra la imagen.
 
 ## Pendientes
 

@@ -9,23 +9,30 @@ DirectoryIndex index.html
 # Sin listado de carpetas: si falta un index, no mostrar los archivos
 Options -Indexes
 
-# ------------------------------------------------- HTTPS y www → sin www
+# --------------------------------------------- archivos que no se publican
+# El deploy es por Git, así que Hostinger clona el repo entero dentro de
+# public_html: quedan ahí el .dc.html, scripts/, supabase/ con los .sql y el
+# propio .git. Nada de eso debe servirse por HTTP.
+#
+# Va ANTES de las redirecciones para que un pedido a /.git/config se corte acá
+# y no se lo lleve primero el redirect a HTTPS.
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Forzar HTTPS (Hostinger pasa el protocolo original en esta variable)
-  RewriteCond %{HTTPS} !=on
-  RewriteCond %{HTTP:X-Forwarded-Proto} !https
-  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+  # El historial de git: lo más delicado de todo
+  RewriteRule (^|/)\.git  - [F,L]
 
-  # Unificar en el dominio sin www
-  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-  RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+  # Carpetas de trabajo
+  RewriteRule ^(supabase|scripts)(/|$)  - [F,L]
+
+  # Fuente del sitio, documentación y scripts de build
+  RewriteRule \.(dc\.html|md|sql|mjs)$  - [F,L]
+
+  # Cualquier otro archivo oculto
+  RewriteRule (^|/)\.(?!well-known)  - [F,L]
 </IfModule>
 
-# --------------------------------------------- archivos que no se publican
-# En Vercel esto lo hacía .vercelignore. Acá se sube toda la carpeta, así que
-# hay que bloquearlos explícitamente.
+# Respaldo por si mod_rewrite no estuviera disponible
 <FilesMatch "\.(dc\.html|md|sql|mjs)$">
   Require all denied
 </FilesMatch>
@@ -36,6 +43,18 @@ Options -Indexes
 
 RedirectMatch 404 ^/(supabase|scripts)(/|$)
 RedirectMatch 404 ^/\.git(/|$)
+
+# ------------------------------------------------- HTTPS y www → sin www
+<IfModule mod_rewrite.c>
+  # Forzar HTTPS (Hostinger pasa el protocolo original en esta variable)
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # Unificar en el dominio sin www
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+</IfModule>
 
 # ----------------------------------------------------- cabeceras de seguridad
 <IfModule mod_headers.c>
