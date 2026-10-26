@@ -60,18 +60,19 @@ Decisiones que conviene conocer antes de editar:
   El fundido de opacidad se mantiene.
 - El degradado del hero es horizontal en escritorio y vertical en móvil, porque
   el texto pasa de estar a la izquierda a ocupar todo el ancho.
-- **Disciplinas es un carrusel horizontal guiado por el scroll.** Arriba de
-  860px la sección se queda pegada y las tarjetas se desplazan de costado
-  mientras bajás; debajo de 860px es un desplazamiento lateral normal con snap.
-  El alto de `[data-ram="dx"]` lo calcula el script a partir del ancho real del
-  track, así que **agregar o quitar disciplinas no requiere tocar nada**.
+- **Disciplinas es un carrusel horizontal con flechas.** Se mueve con los
+  botones de los costados, arrastrando o con el dedo, y **no toca el scroll
+  vertical**: la página sigue de largo con normalidad. Antes retenía la página
+  con `position: sticky` mientras las tarjetas se desplazaban, lo que
+  interrumpía la navegación.
+  Las flechas se atenúan en los extremos pero nunca se deshabilitan: un botón
+  `disabled` no dispara `click`, y si el estado quedara desactualizado la
+  navegación se bloquearía sin forma de recuperarla.
   El resumen y el "Ver disciplina" sólo aparecen al pasar el mouse; en táctil se
-  ven siempre.
-- El contenedor raíz usa `overflow-x: clip` en vez de `hidden`. Son equivalentes
-  para recortar, pero `hidden` crea un contexto de scroll que rompe
-  `position: sticky`, y el carrusel depende de sticky. Queda `hidden` como
-  declaración previa para Safari anterior a 16, donde el carrusel simplemente no
-  se desplaza y las tarjetas se ven en fila.
+  ven siempre. Agregar o quitar disciplinas no requiere tocar nada.
+- El contenedor raíz usa `overflow-x: clip` en vez de `hidden`. Recortan igual,
+  pero `hidden` crea un contexto de scroll que trae efectos secundarios; queda
+  `hidden` como declaración previa para Safari anterior a 16.
 
 ## Deploy en Hostinger (por Git)
 

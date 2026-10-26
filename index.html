@@ -102,57 +102,72 @@
 </script>
 <script>
 (function () {
-  // Disciplinas: convierte el scroll vertical sobre la seccion en
-  // desplazamiento horizontal del track.
-  // El runtime vuelve a montar el DOM, asi que no se cachea nada en los
-  // nodos (se perderia): todo se recalcula por frame, que es barato.
-  var MOBILE = 860;
-  var raf = null;
-
-  function pintar() {
-    raf = null;
-    var wrap = document.querySelector('[data-ram="dx"]');
-    if (!wrap) return;
-    var track = wrap.querySelector('[data-ram="dx-track"]');
-    var sticky = wrap.querySelector('[data-ram="dx-sticky"]');
-    if (!track || !sticky) return;
-
-    if (window.innerWidth <= MOBILE) {
-      if (wrap.style.height) wrap.style.height = '';
-      if (track.style.transform) track.style.transform = '';
-      return;
-    }
-
-    var recorrido = track.scrollWidth - sticky.clientWidth;
-    if (recorrido < 0) recorrido = 0;
-
-    // alto = una pantalla pegada + lo que falte recorrer de costado
-    var alto = (window.innerHeight + recorrido) + 'px';
-    if (wrap.style.height !== alto) wrap.style.height = alto;
-    if (!recorrido) return;
-
-    var total = wrap.offsetHeight - window.innerHeight;
-    var p = total > 0 ? (-wrap.getBoundingClientRect().top / total) : 0;
-    p = p < 0 ? 0 : (p > 1 ? 1 : p);
-
-    track.style.transform = 'translate3d(' + (-p * recorrido).toFixed(1) + 'px,0,0)';
-    var bar = wrap.querySelector('[data-ram="dx-bar"]');
-    if (bar) bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+  // Disciplinas: carrusel horizontal con flechas.
+  // No intercepta el scroll de la pagina: solo mueve su propio contenedor.
+  // El runtime vuelve a montar el DOM, asi que todo se busca al vuelo y los
+  // listeners van en document.
+  function caja() {
+    var t = document.querySelector('[data-ram="dx-track"]');
+    if (!t) return null;
+    var raiz = t.closest('[data-ram="dx"]') || document;
+    return {
+      track: t,
+      barra: raiz.querySelector('[data-ram="dx-bar"]'),
+      prev: raiz.querySelector('[data-ram="dx-prev"]'),
+      next: raiz.querySelector('[data-ram="dx-next"]')
+    };
   }
 
-  function pedir() { if (!raf) raf = requestAnimationFrame(pintar); }
+  function refrescar() {
+    var c = caja();
+    if (!c) return;
+    var max = c.track.scrollWidth - c.track.clientWidth;
+    var x = c.track.scrollLeft;
+    var p = max > 2 ? x / max : 0;
+    if (c.barra) c.barra.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    // Se atenuan en los extremos, pero nunca se deshabilitan: un boton
+    // disabled no dispara click, y si el estado quedara viejo la navegacion
+    // se bloquearia sin forma de recuperarla.
+    if (c.prev) c.prev.setAttribute('data-tope', (max <= 2 || x <= 2) ? 'si' : 'no');
+    if (c.next) c.next.setAttribute('data-tope', (max <= 2 || x >= max - 2) ? 'si' : 'no');
+  }
 
-  window.addEventListener('scroll', pedir, { passive: true });
-  window.addEventListener('resize', pedir);
-  window.addEventListener('load', pedir);
+  function mover(sentido) {
+    var c = caja();
+    if (!c) return;
+    var tarjeta = c.track.querySelector('button');
+    var paso = tarjeta
+      ? tarjeta.getBoundingClientRect().width + 20
+      : c.track.clientWidth * 0.8;
+    c.track.scrollBy({ left: sentido * paso, behavior: 'smooth' });
+    // El evento scroll del contenedor puede no llegar (pestana en segundo
+    // plano, por ejemplo): se refresca igual, durante y al final del recorrido.
+    refrescar();
+    setTimeout(refrescar, 260);
+    setTimeout(refrescar, 650);
+  }
 
-  // El runtime compila con Babel y monta bastante despues del load, y vuelve
-  // a montar al cambiar de pagina. Se observa el DOM en vez de adivinar.
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+    if (e.target.closest('[data-ram="dx-prev"]')) { e.preventDefault(); mover(-1); }
+    else if (e.target.closest('[data-ram="dx-next"]')) { e.preventDefault(); mover(1); }
+  });
+
+  // El scroll de un contenedor no burbujea: hay que escucharlo en captura
+  document.addEventListener('scroll', function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute('data-ram') === 'dx-track') refrescar();
+  }, true);
+
+  window.addEventListener('resize', refrescar);
+  window.addEventListener('load', refrescar);
+
+  // El runtime monta despues del load y vuelve a montar al cambiar de pagina
   var pendiente = null;
   if (window.MutationObserver) {
     new MutationObserver(function () {
       if (pendiente) return;
-      pendiente = setTimeout(function () { pendiente = null; pedir(); }, 120);
+      pendiente = setTimeout(function () { pendiente = null; refrescar(); }, 120);
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
 })();
@@ -178,43 +193,72 @@
 
 
   /* ============================================================
-     DISCIPLINAS: carrusel horizontal guiado por el scroll vertical
-     El alto de [data-ram="dx"] lo calcula el script a partir del ancho
-     real del track, para que lo que se scrollea hacia abajo sea
-     exactamente lo que falta recorrer hacia el costado.
+     DISCIPLINAS: carrusel horizontal
+     Se mueve con las flechas, arrastrando o con el dedo. No toca el
+     scroll vertical: la pagina sigue de largo con normalidad.
      ============================================================ */
-  @media (min-width: 861px) {
-    [data-ram="dx"] { position: relative; }
-    [data-ram="dx-sticky"] {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: clamp(20px, 2.6vw, 36px);
-      overflow: hidden;
-    }
-    [data-ram="dx-track"] {
-      display: flex !important;
-      grid-template-columns: none !important;
-      width: max-content;
-      gap: clamp(16px, 1.6vw, 26px) !important;
-      will-change: transform;
-    }
-    /* Las tarjetas que arrancan fuera de pantalla nunca disparan el
-       observer de entrada, así que acá se muestran siempre. */
-    [data-ram="dx-track"] > * { opacity: 1 !important; transform: none !important; }
+  [data-ram="dx"], [data-ram="dx-caja"] { position: relative; }
 
-    [data-ram="dx-track"] > button {
-      width: clamp(290px, 27vw, 400px);
-      min-width: clamp(290px, 27vw, 400px);
-      min-height: 0 !important;
-      height: min(68vh, 580px);
-    }
+  [data-ram="dx-track"] {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: clamp(14px, 1.6vw, 24px) !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    /* la barra nativa sobra: debajo esta la de progreso */
+    scrollbar-width: none;
+  }
+  [data-ram="dx-track"]::-webkit-scrollbar { display: none; }
 
-    /* Resumen y llamada a la acción suben al pasar el mouse */
+  /* Las tarjetas que arrancan fuera de pantalla nunca disparan el
+     observer de entrada, asi que aca se muestran siempre. */
+  [data-ram="dx-track"] > * { opacity: 1 !important; transform: none !important; }
+
+  [data-ram="dx-track"] > button {
+    flex: 0 0 auto;
+    width: clamp(262px, 27vw, 380px);
+    min-height: 0 !important;
+    height: min(66vh, 540px);
+    scroll-snap-align: start;
+  }
+
+  /* --- flechas --- */
+  [data-ram="dx-prev"], [data-ram="dx-next"] {
+    position: absolute; top: calc(50% - 20px); transform: translateY(-50%);
+    z-index: 5; width: 46px; height: 46px; padding: 0; margin: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,10,10,.85); color: #F5F5F5;
+    border: 1px solid rgba(245,245,245,.25);
+    cursor: pointer;
+    transition: opacity .25s ease, background .2s ease, border-color .2s ease;
+  }
+  [data-ram="dx-prev"] { left: -10px; }
+  [data-ram="dx-next"] { right: -10px; }
+  [data-ram="dx-prev"]:hover, [data-ram="dx-next"]:hover {
+    background: #F10600; border-color: #F10600;
+  }
+  [data-ram="dx-prev"] svg, [data-ram="dx-next"] svg { width: 20px; height: 20px; }
+  /* En los extremos se atenuan, pero siguen siendo clicables: si por lo que
+     sea el estado quedara desactualizado, nunca bloquean la navegacion. */
+  [data-ram="dx-prev"][data-tope="si"], [data-ram="dx-next"][data-tope="si"] {
+    opacity: .22;
+  }
+
+  /* --- barra de progreso --- */
+  [data-ram="dx-prog"] {
+    height: 3px; background: rgba(191,195,199,.18);
+    overflow: hidden; margin-top: clamp(18px, 2.2vw, 30px);
+  }
+  [data-ram="dx-bar"] {
+    height: 100%; width: 100%; background: #F10600;
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform .12s linear;
+  }
+
+  /* El resumen sube al pasar el mouse; en tactil se ve siempre */
+  @media (hover: hover) and (min-width: 861px) {
     [data-ram="dx-rev"] {
       opacity: 0;
       transform: translateY(18px);
@@ -225,39 +269,14 @@
       opacity: 1;
       transform: none;
     }
-
-    [data-ram="dx-prog"] {
-      height: 3px;
-      background: rgba(191,195,199,.18);
-      overflow: hidden;
-    }
-    [data-ram="dx-bar"] {
-      height: 100%;
-      width: 100%;
-      background: #F10600;
-      transform: scaleX(0);
-      transform-origin: left center;
-    }
   }
 
-  /* Hasta 860px no hay sticky: desplazamiento lateral con snap, que en
-     táctil se entiende solo y no secuestra el scroll de la página. */
   @media (max-width: 860px) {
-    [data-ram="dx-track"] {
-      display: flex !important;
-      grid-template-columns: none !important;
-      gap: 14px !important;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 8px;
-    }
+    [data-ram="dx-prev"], [data-ram="dx-next"] { display: none; }
+    [data-ram="dx-track"] { gap: 14px !important; padding-bottom: 8px; }
     [data-ram="dx-track"] > button {
-      min-width: 78vw;
-      scroll-snap-align: start;
-      min-height: 420px !important;
+      width: 78vw; height: auto; min-height: 420px !important;
     }
-    [data-ram="dx-prog"] { display: none; }
   }
 
   /* ============================================================
@@ -542,7 +561,13 @@
       </div>
 
       <div data-ram="dx">
-      <div data-ram="dx-sticky">
+      <div data-ram="dx-caja">
+      <button type="button" data-ram="dx-prev" aria-label="Disciplina anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+      </button>
+      <button type="button" data-ram="dx-next" aria-label="Disciplina siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+      </button>
       <div data-ram="dx-track" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
       <sc-for list="{{ disciplinas }}" as="d" hint-placeholder-count="6">
         <button type="button" onClick="{{ d.open }}" data-reveal style="opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s ease;position:relative;min-height:440px;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;overflow:hidden;background:#0A0A0A;border:1px solid rgba(191,195,199,.12);text-align:left;cursor:pointer;color:#F5F5F5;font-family:inherit" style-hover="border-color:rgba(241,6,0,.65)">

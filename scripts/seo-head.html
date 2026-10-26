@@ -97,57 +97,72 @@
 </script>
 <script>
 (function () {
-  // Disciplinas: convierte el scroll vertical sobre la seccion en
-  // desplazamiento horizontal del track.
-  // El runtime vuelve a montar el DOM, asi que no se cachea nada en los
-  // nodos (se perderia): todo se recalcula por frame, que es barato.
-  var MOBILE = 860;
-  var raf = null;
-
-  function pintar() {
-    raf = null;
-    var wrap = document.querySelector('[data-ram="dx"]');
-    if (!wrap) return;
-    var track = wrap.querySelector('[data-ram="dx-track"]');
-    var sticky = wrap.querySelector('[data-ram="dx-sticky"]');
-    if (!track || !sticky) return;
-
-    if (window.innerWidth <= MOBILE) {
-      if (wrap.style.height) wrap.style.height = '';
-      if (track.style.transform) track.style.transform = '';
-      return;
-    }
-
-    var recorrido = track.scrollWidth - sticky.clientWidth;
-    if (recorrido < 0) recorrido = 0;
-
-    // alto = una pantalla pegada + lo que falte recorrer de costado
-    var alto = (window.innerHeight + recorrido) + 'px';
-    if (wrap.style.height !== alto) wrap.style.height = alto;
-    if (!recorrido) return;
-
-    var total = wrap.offsetHeight - window.innerHeight;
-    var p = total > 0 ? (-wrap.getBoundingClientRect().top / total) : 0;
-    p = p < 0 ? 0 : (p > 1 ? 1 : p);
-
-    track.style.transform = 'translate3d(' + (-p * recorrido).toFixed(1) + 'px,0,0)';
-    var bar = wrap.querySelector('[data-ram="dx-bar"]');
-    if (bar) bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+  // Disciplinas: carrusel horizontal con flechas.
+  // No intercepta el scroll de la pagina: solo mueve su propio contenedor.
+  // El runtime vuelve a montar el DOM, asi que todo se busca al vuelo y los
+  // listeners van en document.
+  function caja() {
+    var t = document.querySelector('[data-ram="dx-track"]');
+    if (!t) return null;
+    var raiz = t.closest('[data-ram="dx"]') || document;
+    return {
+      track: t,
+      barra: raiz.querySelector('[data-ram="dx-bar"]'),
+      prev: raiz.querySelector('[data-ram="dx-prev"]'),
+      next: raiz.querySelector('[data-ram="dx-next"]')
+    };
   }
 
-  function pedir() { if (!raf) raf = requestAnimationFrame(pintar); }
+  function refrescar() {
+    var c = caja();
+    if (!c) return;
+    var max = c.track.scrollWidth - c.track.clientWidth;
+    var x = c.track.scrollLeft;
+    var p = max > 2 ? x / max : 0;
+    if (c.barra) c.barra.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    // Se atenuan en los extremos, pero nunca se deshabilitan: un boton
+    // disabled no dispara click, y si el estado quedara viejo la navegacion
+    // se bloquearia sin forma de recuperarla.
+    if (c.prev) c.prev.setAttribute('data-tope', (max <= 2 || x <= 2) ? 'si' : 'no');
+    if (c.next) c.next.setAttribute('data-tope', (max <= 2 || x >= max - 2) ? 'si' : 'no');
+  }
 
-  window.addEventListener('scroll', pedir, { passive: true });
-  window.addEventListener('resize', pedir);
-  window.addEventListener('load', pedir);
+  function mover(sentido) {
+    var c = caja();
+    if (!c) return;
+    var tarjeta = c.track.querySelector('button');
+    var paso = tarjeta
+      ? tarjeta.getBoundingClientRect().width + 20
+      : c.track.clientWidth * 0.8;
+    c.track.scrollBy({ left: sentido * paso, behavior: 'smooth' });
+    // El evento scroll del contenedor puede no llegar (pestana en segundo
+    // plano, por ejemplo): se refresca igual, durante y al final del recorrido.
+    refrescar();
+    setTimeout(refrescar, 260);
+    setTimeout(refrescar, 650);
+  }
 
-  // El runtime compila con Babel y monta bastante despues del load, y vuelve
-  // a montar al cambiar de pagina. Se observa el DOM en vez de adivinar.
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+    if (e.target.closest('[data-ram="dx-prev"]')) { e.preventDefault(); mover(-1); }
+    else if (e.target.closest('[data-ram="dx-next"]')) { e.preventDefault(); mover(1); }
+  });
+
+  // El scroll de un contenedor no burbujea: hay que escucharlo en captura
+  document.addEventListener('scroll', function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute('data-ram') === 'dx-track') refrescar();
+  }, true);
+
+  window.addEventListener('resize', refrescar);
+  window.addEventListener('load', refrescar);
+
+  // El runtime monta despues del load y vuelve a montar al cambiar de pagina
   var pendiente = null;
   if (window.MutationObserver) {
     new MutationObserver(function () {
       if (pendiente) return;
-      pendiente = setTimeout(function () { pendiente = null; pedir(); }, 120);
+      pendiente = setTimeout(function () { pendiente = null; refrescar(); }, 120);
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
 })();

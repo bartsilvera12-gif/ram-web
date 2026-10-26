@@ -24,43 +24,72 @@
 
 
   /* ============================================================
-     DISCIPLINAS: carrusel horizontal guiado por el scroll vertical
-     El alto de [data-ram="dx"] lo calcula el script a partir del ancho
-     real del track, para que lo que se scrollea hacia abajo sea
-     exactamente lo que falta recorrer hacia el costado.
+     DISCIPLINAS: carrusel horizontal
+     Se mueve con las flechas, arrastrando o con el dedo. No toca el
+     scroll vertical: la pagina sigue de largo con normalidad.
      ============================================================ */
-  @media (min-width: 861px) {
-    [data-ram="dx"] { position: relative; }
-    [data-ram="dx-sticky"] {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: clamp(20px, 2.6vw, 36px);
-      overflow: hidden;
-    }
-    [data-ram="dx-track"] {
-      display: flex !important;
-      grid-template-columns: none !important;
-      width: max-content;
-      gap: clamp(16px, 1.6vw, 26px) !important;
-      will-change: transform;
-    }
-    /* Las tarjetas que arrancan fuera de pantalla nunca disparan el
-       observer de entrada, así que acá se muestran siempre. */
-    [data-ram="dx-track"] > * { opacity: 1 !important; transform: none !important; }
+  [data-ram="dx"], [data-ram="dx-caja"] { position: relative; }
 
-    [data-ram="dx-track"] > button {
-      width: clamp(290px, 27vw, 400px);
-      min-width: clamp(290px, 27vw, 400px);
-      min-height: 0 !important;
-      height: min(68vh, 580px);
-    }
+  [data-ram="dx-track"] {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: clamp(14px, 1.6vw, 24px) !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    /* la barra nativa sobra: debajo esta la de progreso */
+    scrollbar-width: none;
+  }
+  [data-ram="dx-track"]::-webkit-scrollbar { display: none; }
 
-    /* Resumen y llamada a la acción suben al pasar el mouse */
+  /* Las tarjetas que arrancan fuera de pantalla nunca disparan el
+     observer de entrada, asi que aca se muestran siempre. */
+  [data-ram="dx-track"] > * { opacity: 1 !important; transform: none !important; }
+
+  [data-ram="dx-track"] > button {
+    flex: 0 0 auto;
+    width: clamp(262px, 27vw, 380px);
+    min-height: 0 !important;
+    height: min(66vh, 540px);
+    scroll-snap-align: start;
+  }
+
+  /* --- flechas --- */
+  [data-ram="dx-prev"], [data-ram="dx-next"] {
+    position: absolute; top: calc(50% - 20px); transform: translateY(-50%);
+    z-index: 5; width: 46px; height: 46px; padding: 0; margin: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,10,10,.85); color: #F5F5F5;
+    border: 1px solid rgba(245,245,245,.25);
+    cursor: pointer;
+    transition: opacity .25s ease, background .2s ease, border-color .2s ease;
+  }
+  [data-ram="dx-prev"] { left: -10px; }
+  [data-ram="dx-next"] { right: -10px; }
+  [data-ram="dx-prev"]:hover, [data-ram="dx-next"]:hover {
+    background: #F10600; border-color: #F10600;
+  }
+  [data-ram="dx-prev"] svg, [data-ram="dx-next"] svg { width: 20px; height: 20px; }
+  /* En los extremos se atenuan, pero siguen siendo clicables: si por lo que
+     sea el estado quedara desactualizado, nunca bloquean la navegacion. */
+  [data-ram="dx-prev"][data-tope="si"], [data-ram="dx-next"][data-tope="si"] {
+    opacity: .22;
+  }
+
+  /* --- barra de progreso --- */
+  [data-ram="dx-prog"] {
+    height: 3px; background: rgba(191,195,199,.18);
+    overflow: hidden; margin-top: clamp(18px, 2.2vw, 30px);
+  }
+  [data-ram="dx-bar"] {
+    height: 100%; width: 100%; background: #F10600;
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform .12s linear;
+  }
+
+  /* El resumen sube al pasar el mouse; en tactil se ve siempre */
+  @media (hover: hover) and (min-width: 861px) {
     [data-ram="dx-rev"] {
       opacity: 0;
       transform: translateY(18px);
@@ -71,39 +100,14 @@
       opacity: 1;
       transform: none;
     }
-
-    [data-ram="dx-prog"] {
-      height: 3px;
-      background: rgba(191,195,199,.18);
-      overflow: hidden;
-    }
-    [data-ram="dx-bar"] {
-      height: 100%;
-      width: 100%;
-      background: #F10600;
-      transform: scaleX(0);
-      transform-origin: left center;
-    }
   }
 
-  /* Hasta 860px no hay sticky: desplazamiento lateral con snap, que en
-     táctil se entiende solo y no secuestra el scroll de la página. */
   @media (max-width: 860px) {
-    [data-ram="dx-track"] {
-      display: flex !important;
-      grid-template-columns: none !important;
-      gap: 14px !important;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 8px;
-    }
+    [data-ram="dx-prev"], [data-ram="dx-next"] { display: none; }
+    [data-ram="dx-track"] { gap: 14px !important; padding-bottom: 8px; }
     [data-ram="dx-track"] > button {
-      min-width: 78vw;
-      scroll-snap-align: start;
-      min-height: 420px !important;
+      width: 78vw; height: auto; min-height: 420px !important;
     }
-    [data-ram="dx-prog"] { display: none; }
   }
 
   /* ============================================================
@@ -388,7 +392,13 @@
       </div>
 
       <div data-ram="dx">
-      <div data-ram="dx-sticky">
+      <div data-ram="dx-caja">
+      <button type="button" data-ram="dx-prev" aria-label="Disciplina anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+      </button>
+      <button type="button" data-ram="dx-next" aria-label="Disciplina siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+      </button>
       <div data-ram="dx-track" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
       <sc-for list="{{ disciplinas }}" as="d" hint-placeholder-count="6">
         <button type="button" onClick="{{ d.open }}" data-reveal style="opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s ease;position:relative;min-height:440px;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;overflow:hidden;background:#0A0A0A;border:1px solid rgba(191,195,199,.12);text-align:left;cursor:pointer;color:#F5F5F5;font-family:inherit" style-hover="border-color:rgba(241,6,0,.65)">
