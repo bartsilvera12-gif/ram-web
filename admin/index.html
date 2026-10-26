@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Panel · RAM Martial Arts</title>
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -152,32 +155,6 @@
     border: 1px solid var(--borde); flex: 0 0 auto;
   }
   .img-controles { flex: 1 1 240px; min-width: 0; }
-
-  /* ---------- galería ---------- */
-  .galeria-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 14px;
-  }
-  .foto { background: var(--panel); border: 1px solid var(--borde); padding: 10px; }
-  .foto img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; margin-bottom: 10px; }
-  .foto.destacada { border-color: var(--rojo); }
-  .marca-destacada {
-    display: flex; align-items: center; gap: 7px; font-size: 11px;
-    text-transform: uppercase; letter-spacing: .1em; color: var(--apagado);
-    cursor: pointer; margin-bottom: 8px;
-  }
-  .foto.destacada .marca-destacada { color: var(--rojo); }
-
-  /* ---------- horarios ---------- */
-  .tabla { width: 100%; border-collapse: collapse; }
-  .tabla th {
-    text-align: left; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--apagado); padding: 10px; font-family: 'JetBrains Mono', monospace;
-    border-bottom: 1px solid var(--borde); font-weight: 500;
-  }
-  .tabla td { padding: 5px; border-bottom: 1px solid rgba(191,195,199,.08); }
-  .tabla input { padding: 9px 10px; }
-  .envoltorio-tabla { overflow-x: auto; }
-  .envoltorio-tabla .tabla { min-width: 680px; }
 
   /* ---------- login ---------- */
   .login {

@@ -7,7 +7,10 @@
 
   var CFG = window.RAM_CONFIG || {};
   var supa = null;
-  var estado = { seccion: 'disciplinas', instructores: [], disciplinas: [] };
+  var estado = { seccion: 'disciplinas', editando: null, instructores: [], disciplinas: [] };
+
+  // Secciones que muestran listado y abren un detalle al editar
+  var CON_LISTADO = ['disciplinas', 'instructores', 'horarios', 'galeria'];
 
   /* ---------------------------------- utilidades --------------------------- */
 
@@ -493,48 +496,73 @@
 
   async function vistaHorarios() {
     var filas = await traer('horarios');
+
+    if (estado.editando) {
+      var h = estado.editando === 'nuevo'
+        ? { orden: (filas.length + 1) * 10, activo: true }
+        : filas.find(function (x) { return x.id === estado.editando; });
+      if (!h) { estado.editando = null; return vistaHorarios(); }
+      $('#vista').innerHTML =
+        botonVolver() +
+        cabecera(estado.editando === 'nuevo' ? 'Nueva clase' : h.clase,
+          'Así aparece la fila en la tabla de horarios del sitio.') +
+        fichaHorario(h);
+      conectarVolver();
+      return;
+    }
+
     $('#vista').innerHTML =
-      cabecera('Horarios', 'Esta es la tabla que se ve en el sitio. Agregá, edití o borrá filas libremente.') +
-      '<div class="ficha"><div class="envoltorio-tabla"><table class="tabla"><thead><tr>' +
-        '<th style="width:70px">Orden</th><th>Clase</th><th>Días</th><th>Hora</th><th>Nivel</th><th style="width:40px"></th>' +
-      '</tr></thead><tbody id="cuerpo">' + filas.map(filaHorario).join('') + '</tbody></table></div>' +
-      '<div class="acciones"><button class="btn fantasma" id="btn-fila">Agregar fila</button>' +
-      '<button class="btn" id="btn-guardar-todo">Guardar todo</button></div></div>';
+      cabecera('Horarios', 'Tocá <strong>Editar</strong> para cambiar una clase.') +
+      '<div class="barra-acciones">' +
+        '<span class="ficha-meta">' + filas.length + ' clase(s)</span>' +
+        '<button class="btn" id="btn-nuevo">+ Agregar clase</button>' +
+      '</div>' +
+      (filas.length
+        ? '<div class="lista">' + filas.map(itemHorario).join('') + '</div>'
+        : '<p class="vacio">Todavía no hay horarios cargados.</p>');
 
-    $('#btn-fila').addEventListener('click', function () {
-      var n = $('#cuerpo').children.length;
-      $('#cuerpo').insertAdjacentHTML('beforeend', filaHorario({ orden: (n + 1) * 10, activo: true }));
+    $('#btn-nuevo').addEventListener('click', function () {
+      estado.editando = 'nuevo';
+      abrir('horarios');
     });
-    $('#btn-guardar-todo').addEventListener('click', guardarHorarios);
   }
 
-  function filaHorario(h) {
-    return '<tr data-id="' + esc(h.id || '') + '">' +
-      '<td><input type="number" data-campo="orden" value="' + (h.orden || 0) + '"></td>' +
-      '<td><input type="text" data-campo="clase" value="' + esc(h.clase || '') + '"></td>' +
-      '<td><input type="text" data-campo="dias" value="' + esc(h.dias || '') + '"></td>' +
-      '<td><input type="text" data-campo="hora" value="' + esc(h.hora || '') + '"></td>' +
-      '<td><input type="text" data-campo="nivel" value="' + esc(h.nivel || '') + '"></td>' +
-      '<td><button class="btn peligro chico" data-quitar title="Quitar">✕</button></td>' +
-    '</tr>';
+  function itemHorario(h) {
+    var detalle = [h.dias, h.hora, h.nivel].filter(Boolean).join(' · ');
+    return '<div class="item' + (h.activo === false ? ' inactivo' : '') + '" data-id="' + esc(h.id) + '" data-tabla="horarios">' +
+      '<div class="item-txt">' +
+        '<div class="item-nombre">' + esc(h.clase) +
+          (h.activo === false ? '<span class="etiqueta-oculto">oculta</span>' : '') + '</div>' +
+        '<div class="item-meta">' + esc(detalle || 'sin datos') + ' · orden ' + (h.orden || 0) + '</div>' +
+      '</div>' +
+      '<div class="item-botones">' +
+        '<button class="btn fantasma chico" data-editar>Editar</button>' +
+        '<button class="btn peligro chico" data-borrar-item>Eliminar</button>' +
+      '</div>' +
+    '</div>';
   }
 
-  async function guardarHorarios() {
-    var btn = $('#btn-guardar-todo');
-    ocupado(btn, true);
-    try {
-      var filas = [].slice.call($('#cuerpo').children);
-      for (var i = 0; i < filas.length; i++) {
-        var o = leerCampos(filas[i]);
-        if (!o.clase) continue;
-        o.activo = true;
-        if (filas[i].dataset.id) o.id = filas[i].dataset.id;
-        var g = await guardarFila('horarios', o);
-        filas[i].dataset.id = g.id;
-      }
-      aviso('Horarios guardados.', 'ok');
-    } catch (e) { fallo(e, 'Guardando horarios'); }
-    finally { ocupado(btn, false); }
+  function fichaHorario(h) {
+    return '<section class="ficha" data-id="' + esc(h.id || '') + '" data-tabla="horarios">' +
+      '<div class="fila">' +
+        '<div><label>Clase</label><input type="text" data-campo="clase" value="' + esc(h.clase || '') + '"></div>' +
+        '<div><label>Orden</label><input type="number" data-campo="orden" value="' + (h.orden || 0) + '"></div>' +
+      '</div>' +
+      '<div class="fila">' +
+        '<div><label>Días</label><input type="text" data-campo="dias" value="' + esc(h.dias || '') + '">' +
+          '<p class="ayuda">Ej: «Lun · Mié · Vie».</p></div>' +
+        '<div><label>Hora</label><input type="text" data-campo="hora" value="' + esc(h.hora || '') + '">' +
+          '<p class="ayuda">Ej: «19:00 – 20:30».</p></div>' +
+      '</div>' +
+      '<label>Nivel</label><input type="text" data-campo="nivel" value="' + esc(h.nivel || '') + '">' +
+      '<p class="ayuda">Ej: «Todos», «Inicial», «Infantil».</p>' +
+      '<label style="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-family:Poppins,sans-serif;color:var(--texto)">' +
+        '<input type="checkbox" data-campo="activo"' + (h.activo !== false ? ' checked' : '') + '> Visible en el sitio</label>' +
+      '<div class="acciones">' +
+        '<button class="btn" data-guardar>' + (h.id ? 'Guardar cambios' : 'Crear clase') + '</button>' +
+        '<button class="btn fantasma" data-cancelar>Cancelar</button>' +
+      '</div>' +
+    '</section>';
   }
 
   /* ---------------------------------- POR QUÉ RAM -------------------------- */
@@ -582,18 +610,30 @@
 
   async function vistaGaleria() {
     var fotos = await traer('galeria');
-    var destacadas = fotos.filter(function (f) { return f.destacada; }).length;
+
+    if (estado.editando) {
+      var f = fotos.find(function (x) { return x.id === estado.editando; });
+      if (!f) { estado.editando = null; return vistaGaleria(); }
+      $('#vista').innerHTML =
+        botonVolver() +
+        cabecera('Foto', 'La descripción se usa como texto alternativo, para accesibilidad y buscadores.') +
+        fichaFoto(f);
+      conectarVolver();
+      return;
+    }
+
+    var destacadas = fotos.filter(function (x) { return x.destacada; }).length;
     $('#vista').innerHTML =
       cabecera('Galería',
-        'Las <strong>destacadas</strong> son las que aparecen en el inicio: conviene dejar exactamente 4. ' +
-        'El resto se ve en la página de galería. <span id="cuenta"></span>') +
-      '<div class="ficha">' +
-        '<label class="btn" style="margin:0;cursor:pointer;display:inline-flex">Subir fotos' +
-        '<input type="file" accept="image/*" multiple id="subir-varias" style="display:none"></label>' +
-        '<p class="ayuda">Podés elegir varias de una vez.</p>' +
+        'Las <strong>destacadas</strong> son las cuatro que aparecen en el inicio. El resto se ve en la página de galería.') +
+      '<div class="barra-acciones">' +
+        '<span class="ficha-meta" id="cuenta"></span>' +
+        '<label class="btn" style="margin:0;cursor:pointer;display:inline-flex">+ Subir fotos' +
+          '<input type="file" accept="image/*" multiple id="subir-varias" style="display:none"></label>' +
       '</div>' +
-      '<div class="galeria-grid" id="grilla">' + fotos.map(fichaFoto).join('') + '</div>' +
-      (fotos.length ? '' : '<p class="vacio">Todavía no hay fotos.</p>');
+      (fotos.length
+        ? '<div class="lista">' + fotos.map(itemFoto).join('') + '</div>'
+        : '<p class="vacio">Todavía no hay fotos. Subí las primeras con el botón de arriba.</p>');
     pintarCuenta(destacadas);
 
     $('#subir-varias').addEventListener('change', async function () {
@@ -616,20 +656,42 @@
   function pintarCuenta(n) {
     var el = $('#cuenta');
     if (!el) return;
-    el.textContent = 'Ahora hay ' + n + ' destacada(s).';
+    el.textContent = n + ' destacada(s) de 4';
     el.style.color = n === 4 ? 'var(--apagado)' : 'var(--rojo)';
   }
 
+  function itemFoto(f) {
+    return '<div class="item' + (f.activo === false ? ' inactivo' : '') + '" data-id="' + esc(f.id) + '" data-tabla="galeria">' +
+      '<img class="item-img" src="' + esc(urlImagen(f.img)) + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' +
+      '<div class="item-txt">' +
+        '<div class="item-nombre">' + esc(f.alt || 'Sin descripción') +
+          (f.destacada ? '<span class="etiqueta-oculto" style="border-color:var(--rojo);color:var(--rojo)">destacada</span>' : '') + '</div>' +
+        '<div class="item-meta">orden ' + (f.orden || 0) + '</div>' +
+      '</div>' +
+      '<div class="item-botones">' +
+        '<button class="btn fantasma chico" data-editar>Editar</button>' +
+        '<button class="btn peligro chico" data-borrar-item>Eliminar</button>' +
+      '</div>' +
+    '</div>';
+  }
+
   function fichaFoto(f) {
-    return '<div class="foto' + (f.destacada ? ' destacada' : '') + '" data-id="' + esc(f.id) + '" data-tabla="galeria">' +
-      '<img src="' + esc(urlImagen(f.img)) + '" alt="" loading="lazy">' +
-      '<label class="marca-destacada"><input type="checkbox" data-destacada' + (f.destacada ? ' checked' : '') + '> Destacada</label>' +
-      '<input type="text" data-alt value="' + esc(f.alt || '') + '" placeholder="Descripción" style="margin-bottom:8px">' +
-      '<input type="number" data-orden value="' + (f.orden || 0) + '" style="margin-bottom:8px">' +
-      '<div style="display:flex;gap:6px">' +
-        '<button class="btn chico" data-guardar-foto style="flex:1">Guardar</button>' +
-        '<button class="btn peligro chico" data-borrar>✕</button>' +
-      '</div></div>';
+    return '<section class="ficha" data-id="' + esc(f.id) + '" data-tabla="galeria">' +
+      campoImagen('Imagen', f.img, 'img') +
+      '<label>Descripción</label>' +
+      '<input type="text" data-campo="alt" value="' + esc(f.alt || '') + '" placeholder="Qué se ve en la foto">' +
+      '<div class="fila">' +
+        '<div><label>Orden</label><input type="number" data-campo="orden" value="' + (f.orden || 0) + '"></div>' +
+      '</div>' +
+      '<label style="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-family:Poppins,sans-serif;color:var(--texto)">' +
+        '<input type="checkbox" data-campo="destacada"' + (f.destacada ? ' checked' : '') + '> Destacada (sale en el inicio)</label>' +
+      '<label style="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-family:Poppins,sans-serif;color:var(--texto)">' +
+        '<input type="checkbox" data-campo="activo"' + (f.activo !== false ? ' checked' : '') + '> Visible en el sitio</label>' +
+      '<div class="acciones">' +
+        '<button class="btn" data-guardar>Guardar cambios</button>' +
+        '<button class="btn fantasma" data-cancelar>Cancelar</button>' +
+      '</div>' +
+    '</section>';
   }
 
   /* ---------------------------------- INSTRUCTORES ------------------------- */
@@ -777,26 +839,12 @@
         var f = await guardarFila(tabla, o);
         ficha.dataset.id = f.id;
         aviso('Guardado.', 'ok');
-        // los que tienen listado vuelven a él; los que se editan en bloque, no
-        if (estado.seccion === 'instructores') { estado.editando = null; abrir('instructores'); }
+        // los que tienen listado vuelven a él; «Por qué RAM» se edita en bloque
+        if (CON_LISTADO.indexOf(estado.seccion) >= 0) {
+          estado.editando = null;
+          abrir(estado.seccion);
+        }
       } catch (e) { fallo(e, 'Guardando'); } finally { ocupado(btn, false); }
-      return;
-    }
-
-    // guardar una foto de la galería
-    if (btn.hasAttribute('data-guardar-foto')) {
-      ocupado(btn, true);
-      try {
-        await guardarFila('galeria', {
-          id: ficha.dataset.id,
-          alt: $('[data-alt]', ficha).value.trim(),
-          orden: parseInt($('[data-orden]', ficha).value, 10) || 0,
-          destacada: $('[data-destacada]', ficha).checked
-        });
-        ficha.classList.toggle('destacada', $('[data-destacada]', ficha).checked);
-        pintarCuenta(document.querySelectorAll('.foto [data-destacada]:checked').length);
-        aviso('Foto guardada.', 'ok');
-      } catch (e) { fallo(e, 'Guardando foto'); } finally { ocupado(btn, false); }
       return;
     }
 
@@ -822,16 +870,10 @@
     }
 
     if (btn.hasAttribute('data-cancelar')) {
-      if (estado.seccion === 'disciplinas' || estado.seccion === 'instructores') {
+      if (CON_LISTADO.indexOf(estado.seccion) >= 0) {
         estado.editando = null;
         abrir(estado.seccion);
       } else { ficha.remove(); }
-      return;
-    }
-    if (btn.hasAttribute('data-quitar')) {
-      var id = ficha.dataset.id;
-      ficha.remove();
-      if (id) { try { await borrarFila('horarios', id); } catch (e) { fallo(e, 'Borrando'); } }
       return;
     }
 
@@ -845,7 +887,6 @@
         if (ficha.dataset.id) await borrarFila(tablaB, ficha.dataset.id);
         ficha.remove();
         aviso('Eliminado.', 'ok');
-        if (tablaB === 'galeria') pintarCuenta(document.querySelectorAll('.foto [data-destacada]:checked').length);
       } catch (e) { fallo(e, 'Eliminando'); }
     }
   });
