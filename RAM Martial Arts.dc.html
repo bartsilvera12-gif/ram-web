@@ -284,8 +284,13 @@
     }
   }
 
+  /* La galeria destacada se acomoda a la cantidad que haya marcada:
+     con 4 entra una fila, con 5 o mas se reparten solas. */
+  @media (max-width: 760px) {
+    [data-ram-grid="dest"] { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  }
   @media (max-width: 420px) {
-    [data-ram-grid="stats"] { grid-template-columns: 1fr !important; }
+    [data-ram-grid="stats"], [data-ram-grid="dest"] { grid-template-columns: 1fr !important; }
   }
 </style>
 </helmet>
@@ -507,7 +512,7 @@
       <h2 style="margin:16px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(28px,3.2vw,48px);line-height:.98;letter-spacing:-.02em;text-transform:uppercase">Así se entrena en RAM</h2>
       <div style="width:64px;height:3px;background:#F10600;margin:20px auto 0"></div>
     </div>
-    <div data-ram-grid="stats" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:clamp(32px,4vw,56px)">
+    <div data-ram-grid="dest" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:clamp(32px,4vw,56px)">
       <sc-for list="{{ destacadas }}" as="g" hint-placeholder-count="4"><a href="#galeria" onClick="{{ goGaleria }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;position:relative;display:block;overflow:hidden">
         <img src="{{ g.src }}" alt="{{ g.alt }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.05);transition:transform .7s ease" style-hover="transform:scale(1.06)" />
       </a></sc-for>
@@ -1203,10 +1208,11 @@ class Component extends DCLogic {
       destacadas: (() => {
         const d = this.D();
         const g = d && d.galeria ? d.galeria.filter((x) => x.destacada) : [];
-        const l = g.length
-          ? g.slice(0, 4).map((x) => ({ src: Component.ruta(x.img), alt: x.alt || 'Entrenamiento RAM' }))
+        // Se muestran TODAS las marcadas: si marcas una, aparece. Limitar a
+        // cuatro hacia que marcar la quinta no tuviera ningun efecto visible.
+        return g.length
+          ? g.map((x) => ({ src: Component.ruta(x.img), alt: x.alt || 'Entrenamiento RAM' }))
           : Component.DESTACADAS.map((x) => ({ src: 'uploads/' + encodeURIComponent(x[0]), alt: x[1] }));
-        return l;
       })(),
       heroImg: Component.ruta(this.aj('hero_img', 'uploads/_MG_7132 (1).JPG.jpeg')),
       porqueKicker: this.aj('porque_kicker', 'Por qu\u00e9 RAM'),

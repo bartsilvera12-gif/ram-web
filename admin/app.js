@@ -625,7 +625,8 @@
     var destacadas = fotos.filter(function (x) { return x.destacada; }).length;
     $('#vista').innerHTML =
       cabecera('Galería',
-        'Las <strong>destacadas</strong> son las cuatro que aparecen en el inicio. El resto se ve en la página de galería.') +
+        'Las <strong>destacadas</strong> aparecen en el inicio; el resto, en la página de galería. ' +
+        'Con cuatro queda una fila pareja, pero podés marcar las que quieras.') +
       '<div class="barra-acciones">' +
         '<span class="ficha-meta" id="cuenta"></span>' +
         '<label class="btn" style="margin:0;cursor:pointer;display:inline-flex">+ Subir fotos' +
@@ -656,8 +657,8 @@
   function pintarCuenta(n) {
     var el = $('#cuenta');
     if (!el) return;
-    el.textContent = n + ' destacada(s) de 4';
-    el.style.color = n === 4 ? 'var(--apagado)' : 'var(--rojo)';
+    el.textContent = n + ' destacada(s) en el inicio';
+    el.style.color = n ? 'var(--apagado)' : 'var(--rojo)';
   }
 
   function itemFoto(f) {
