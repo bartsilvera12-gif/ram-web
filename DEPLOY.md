@@ -1,4 +1,4 @@
-# Deploy en Vercel — RAM Martial Arts
+# Deploy en Hostinger — RAM Martial Arts
 
 Sitio estático. No necesita build ni dependencias: `support.js` carga React y Babel
 desde unpkg en el navegador.
@@ -11,16 +11,17 @@ desde unpkg en el navegador.
 | `RAM Martial Arts.dc.html` | Fuente editable del Design Composer |
 | `support.js` | Runtime que interpreta el `.dc.html` |
 | `uploads/` | Imágenes |
-| `vercel.json` | Cache de assets + headers de seguridad |
+| `.htaccess` | Cache, HTTPS, headers de seguridad y archivos que no se publican |
 | `config.js` | Conexion a Supabase (la usan el sitio y el panel) |
 | `admin/` | Panel de administracion, en /admin |
 | `supabase/instalar.sql` | Schema `ram` + contenido inicial, para el SQL Editor |
 | `robots.txt` | Indexación abierta |
 
-`.vercelignore` excluye del deploy el `.dc.html`, `scripts/`, `.thumbnail` y este archivo.
+En Hostinger se sube toda la carpeta, asi que es el `.htaccess` el que bloquea
+el `.dc.html`, `scripts/`, `supabase/`, los `.md` y los archivos ocultos.
 
 El contenido editable (disciplinas, horarios, galeria, instructores, textos y
-datos de contacto) vive en Supabase y se administra desde .
+datos de contacto) vive en Supabase y se administra desde `/admin/`.
 Ver **[ADMIN.md](ADMIN.md)** para la puesta en marcha. Si Supabase no esta
 configurado o no responde, el sitio usa el contenido escrito en el HTML.
 
@@ -72,31 +73,54 @@ Decisiones que conviene conocer antes de editar:
   declaración previa para Safari anterior a 16, donde el carrusel simplemente no
   se desplaza y las tarjetas se ven en fila.
 
-## Subir
+## Subir a Hostinger
 
-**Opción A — Git (recomendado, deploy automático en cada push):**
+Lo que va al servidor es **solo** esto, en la raiz de `public_html`:
 
-```bash
-git init && git add . && git commit -m "Sitio RAM Martial Arts"
+```
+public_html/
+  .htaccess
+  index.html
+  config.js
+  support.js
+  robots.txt
+  admin/        (index.html y app.js)
+  uploads/      (las fotos)
 ```
 
-Creá el repo en GitHub, hacé push, y en vercel.com → **Add New → Project** importalo.
-En Framework Preset elegí **Other** y dejá Build Command y Output Directory vacíos.
+No subas `RAM Martial Arts.dc.html`, `scripts/`, `supabase/` ni los `.md`.
+Si igual se suben, el `.htaccess` los bloquea, pero es mejor que no esten.
 
-**Opción B — CLI:**
+**Opcion A — File Manager (lo mas simple)**
 
-```bash
-npx vercel --prod
-```
+1. hPanel → **Administrador de archivos** → entrar a `public_html`
+2. Subir el ZIP y usar **Extraer**
+3. Confirmar que `.htaccess` quedo en la raiz. El File Manager oculta los
+   archivos que empiezan con punto: activá **Mostrar archivos ocultos**
 
-## Pendiente después del primer deploy
+**Opcion B — FTP**
 
-1. **Reemplazá el dominio placeholder.** En `scripts/seo-head.html` figura
-   `https://rammartialarts.vercel.app/` en `canonical` y `og:image`. Cambialo por tu
-   dominio real y volvé a correr `node scripts/build-index.mjs`. Hasta hacerlo, la
-   vista previa al compartir por WhatsApp puede fallar.
-2. **Peso de `uploads/`: 44 MB, de los cuales solo ~17 MB se usan.** Hay 32 archivos
-   duplicados (los que terminan en `(1)`) que el sitio no referencia. Borrarlos acelera
-   el deploy y la carga.
-3. Las imágenes del hero pesan ~2 MB cada una. Comprimirlas a WebP mejoraría mucho el
-   tiempo de carga en móvil.
+Datos en hPanel → **Archivos → Cuentas FTP**. Subir con FileZilla a
+`public_html`, en modo binario.
+
+**Opcion C — Git**
+
+Si el plan lo incluye: hPanel → **Avanzado → Git**, apuntar al repo y desplegar.
+Ojo que esto sube tambien los archivos que no hacen falta; el `.htaccess` los
+bloquea igual.
+
+## Despues de subir
+
+1. **Verificar que el `.htaccess` se aplica.** Abrir
+   `https://tudominio.com/supabase/instalar.sql` — tiene que dar **404**.
+   Si descarga el archivo, el `.htaccess` no se subio o Apache lo esta ignorando.
+2. **Revisar el panel** en `https://tudominio.com/admin/`.
+3. **Actualizar el dominio en los metadatos.** En `scripts/seo-head.html` figura
+   `https://rammartialarts.vercel.app/` en `canonical` y `og:image`. Cambialo por
+   el dominio real, corré `node scripts/build-index.mjs` y volvé a subir
+   `index.html`. Hasta hacerlo, la vista previa al compartir por WhatsApp falla.
+
+## Pendientes
+
+- Las imagenes del hero pesan ~2 MB cada una. Pasarlas a WebP mejoraria mucho la
+  carga en movil, sobre todo con datos moviles.

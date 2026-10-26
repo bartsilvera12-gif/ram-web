@@ -17,8 +17,8 @@
 // ---------------------------------------------------------------------------
 
 window.RAM_CONFIG = {
-  SUPABASE_URL: 'https://TU-SUPABASE.example.com',
-  SUPABASE_ANON_KEY: 'TU_ANON_KEY',
+  SUPABASE_URL: 'https://api.neura.com.py',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc0MTAxNDYxLCJleHAiOjE5MzE3ODE0NjF9.7_wAph8IolPMXtgfpezSwS5XR62IdD__qhqCywLDp3Q',
 
   // Schema y bucket: coinciden con supabase/instalar.sql
   SCHEMA: 'ram',
