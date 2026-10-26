@@ -37,6 +37,37 @@
     }
     aviso((contexto ? contexto + ': ' : '') + m);
   }
+  // Reemplaza al confirm() del navegador, que no se puede estilar
+  function confirmar(titulo, texto, textoBoton) {
+    return new Promise(function (resolver) {
+      var cont = $('#modal');
+      cont.innerHTML =
+        '<div class="modal-fondo"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-tit">' +
+          '<h2 id="modal-tit">' + esc(titulo) + '</h2>' +
+          '<p>' + esc(texto) + '</p>' +
+          '<div class="acciones">' +
+            '<button class="btn fantasma" data-no>Cancelar</button>' +
+            '<button class="btn peligro" data-si>' + esc(textoBoton || 'Eliminar') + '</button>' +
+          '</div>' +
+        '</div></div>';
+
+      function cerrar(valor) {
+        cont.innerHTML = '';
+        document.removeEventListener('keydown', alTeclado);
+        resolver(valor);
+      }
+      function alTeclado(e) { if (e.key === 'Escape') cerrar(false); }
+
+      document.addEventListener('keydown', alTeclado);
+      $('[data-si]', cont).addEventListener('click', function () { cerrar(true); });
+      $('[data-no]', cont).addEventListener('click', function () { cerrar(false); });
+      $('.modal-fondo', cont).addEventListener('click', function (e) {
+        if (e.target === this) cerrar(false);
+      });
+      $('[data-si]', cont).focus();
+    });
+  }
+
   function ocupado(btn, si) {
     if (!btn) return;
     btn.disabled = !!si;
@@ -102,21 +133,56 @@
 
   /* ---------------------------------- sesión ------------------------------- */
 
+  // Mostrar / ocultar contraseña
+  $('#ver-clave').addEventListener('click', function () {
+    var campo = $('#clave');
+    var visible = campo.type === 'text';
+    campo.type = visible ? 'password' : 'text';
+    this.setAttribute('aria-pressed', visible ? 'false' : 'true');
+    this.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
+    campo.focus();
+  });
+
+  // Los mensajes de Supabase vienen en inglés y son poco claros
+  function enCastellano(e) {
+    var m = (e && (e.message || e.error_description)) || '';
+    if (/invalid login credentials/i.test(m)) return 'Correo o contraseña incorrectos.';
+    if (/email not confirmed/i.test(m)) return 'La cuenta todavía no está confirmada. Activala desde Authentication → Users en Supabase.';
+    if (/failed to fetch|networkerror/i.test(m)) return 'No se pudo conectar con el servidor. Revisá la conexión.';
+    if (/rate limit|too many/i.test(m)) return 'Demasiados intentos seguidos. Esperá un momento y probá de nuevo.';
+    return m || 'No se pudo entrar.';
+  }
+
+  function errorLogin(texto) {
+    var caja = $('#login-error');
+    if (!caja) return;
+    caja.textContent = texto || '';
+    caja.classList.toggle('oculto', !texto);
+  }
+
   $('#form-login').addEventListener('submit', async function (ev) {
     ev.preventDefault();
     var btn = $('#btn-entrar');
+    var correo = $('#correo').value.trim();
+    errorLogin('');
+    if (!correo || !$('#clave').value) {
+      return errorLogin('Completá el correo y la contraseña.');
+    }
     ocupado(btn, true);
     try {
-      var r = await supa.auth.signInWithPassword({
-        email: $('#correo').value.trim(),
-        password: $('#clave').value
-      });
+      var r = await supa.auth.signInWithPassword({ email: correo, password: $('#clave').value });
       if (r.error) throw r.error;
       $('#clave').value = '';
       await entrarAlPanel(r.data.session);
     } catch (e) {
-      fallo(e, 'No se pudo entrar');
+      console.error('login', e);
+      errorLogin(enCastellano(e));
     } finally { ocupado(btn, false); }
+  });
+
+  // Al corregir, se limpia el error
+  ['correo', 'clave'].forEach(function (id) {
+    $('#' + id).addEventListener('input', function () { errorLogin(''); });
   });
 
   $('#btn-salir').addEventListener('click', async function () {
@@ -155,7 +221,7 @@
 
   $('#tabs').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-ir]');
-    if (b) abrir(b.dataset.ir);
+    if (b) { estado.editando = null; abrir(b.dataset.ir); }
   });
 
   async function abrir(id) {
@@ -285,17 +351,62 @@
       (porDisc[v.disciplina_id] = porDisc[v.disciplina_id] || []).push(v.instructor_id);
     });
 
+    // ---- detalle ----
+    if (estado.editando) {
+      var d = estado.editando === 'nuevo'
+        ? { orden: (discs.length + 1) * 10, activo: true }
+        : discs.find(function (x) { return x.id === estado.editando; });
+      if (!d) { estado.editando = null; return vistaDisciplinas(); }
+
+      $('#vista').innerHTML =
+        botonVolver() +
+        cabecera(estado.editando === 'nuevo' ? 'Nueva disciplina' : d.titulo,
+          'La descripción corta es la que se ve en la tarjeta del inicio. La larga aparece al entrar a la disciplina.') +
+        fichaDisciplina(d, profes, porDisc[d.id] || []);
+      conectarVolver();
+      return;
+    }
+
+    // ---- listado ----
     $('#vista').innerHTML =
-      cabecera('Disciplinas',
-        'La descripción corta es la que se ve en la tarjeta del inicio. La larga aparece al entrar a la disciplina.') +
-      '<div id="lista">' + discs.map(function (d) { return fichaDisciplina(d, profes, porDisc[d.id] || []); }).join('') + '</div>' +
-      '<div class="acciones"><button class="btn" id="btn-nueva">Agregar disciplina</button></div>';
+      cabecera('Disciplinas', 'Tocá <strong>Editar</strong> para abrir el detalle de cada una.') +
+      '<div class="barra-acciones">' +
+        '<span class="ficha-meta">' + discs.length + ' disciplina(s)</span>' +
+        '<button class="btn" id="btn-nueva">+ Agregar disciplina</button>' +
+      '</div>' +
+      (discs.length
+        ? '<div class="lista">' + discs.map(itemDisciplina).join('') + '</div>'
+        : '<p class="vacio">Todavía no hay disciplinas cargadas.</p>');
 
     $('#btn-nueva').addEventListener('click', function () {
-      var tmp = document.createElement('div');
-      tmp.innerHTML = fichaDisciplina({ orden: (discs.length + 1) * 10, activo: true }, profes, []);
-      $('#lista').appendChild(tmp.firstChild);
-      window.scrollTo(0, document.body.scrollHeight);
+      estado.editando = 'nuevo';
+      abrir('disciplinas');
+    });
+  }
+
+  function itemDisciplina(d) {
+    return '<div class="item' + (d.activo === false ? ' inactivo' : '') + '" data-id="' + esc(d.id) + '" data-tabla="disciplinas">' +
+      '<img class="item-img" src="' + esc(urlImagen(d.img)) + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' +
+      '<div class="item-txt">' +
+        '<div class="item-nombre">' + esc(d.titulo) +
+          (d.activo === false ? '<span class="etiqueta-oculto">oculta</span>' : '') + '</div>' +
+        '<div class="item-meta">' + esc(d.slug) + ' · orden ' + (d.orden || 0) + '</div>' +
+      '</div>' +
+      '<div class="item-botones">' +
+        '<button class="btn fantasma chico" data-editar>Editar</button>' +
+        '<button class="btn peligro chico" data-borrar-item>Eliminar</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function botonVolver() {
+    return '<button class="volver" id="btn-volver">← Volver al listado</button>';
+  }
+  function conectarVolver() {
+    var b = $('#btn-volver');
+    if (b) b.addEventListener('click', function () {
+      estado.editando = null;
+      abrir(estado.seccion);
     });
   }
 
@@ -338,9 +449,8 @@
       '<label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;font-family:Poppins,sans-serif;color:var(--texto)">' +
         '<input type="checkbox" data-campo="activo"' + (d.activo !== false ? ' checked' : '') + '> Visible en el sitio</label>' +
       '<div class="acciones">' +
-        '<button class="btn" data-guardar>Guardar</button>' +
-        (nuevo ? '<button class="btn fantasma" data-cancelar>Cancelar</button>'
-               : '<button class="btn peligro" data-borrar>Eliminar</button>') +
+        '<button class="btn" data-guardar>' + (nuevo ? 'Crear disciplina' : 'Guardar cambios') + '</button>' +
+        '<button class="btn fantasma" data-cancelar>Cancelar</button>' +
       '</div>' +
     '</section>';
   }
@@ -373,8 +483,8 @@
         if (ins.error) throw ins.error;
       }
       aviso('Disciplina guardada.', 'ok');
-      $('.ficha-titulo', ficha).textContent = fila.titulo;
-      $('.ficha-meta', ficha).textContent = fila.slug;
+      estado.editando = null;
+      abrir('disciplinas');
     } catch (e) { fallo(e, 'Guardando disciplina'); }
     finally { ocupado(btn, false); }
   }
@@ -526,15 +636,50 @@
 
   async function vistaInstructores() {
     var profes = await traer('instructores');
+
+    if (estado.editando) {
+      var p = estado.editando === 'nuevo'
+        ? { orden: (profes.length + 1) * 10, activo: true }
+        : profes.find(function (x) { return x.id === estado.editando; });
+      if (!p) { estado.editando = null; return vistaInstructores(); }
+      $('#vista').innerHTML =
+        botonVolver() +
+        cabecera(estado.editando === 'nuevo' ? 'Nuevo instructor' : p.nombre,
+          'Aparece en la sección Instructores y se puede asignar a cada disciplina.') +
+        fichaInstructor(p);
+      conectarVolver();
+      return;
+    }
+
     $('#vista').innerHTML =
-      cabecera('Instructores', 'Aparecen en la sección Instructores y se pueden asignar a cada disciplina.') +
-      '<div id="lista">' + profes.map(fichaInstructor).join('') + '</div>' +
-      '<div class="acciones"><button class="btn" id="btn-nuevo">Agregar instructor</button></div>';
+      cabecera('Instructores', 'Tocá <strong>Editar</strong> para abrir el detalle de cada uno.') +
+      '<div class="barra-acciones">' +
+        '<span class="ficha-meta">' + profes.length + ' instructor(es)</span>' +
+        '<button class="btn" id="btn-nuevo">+ Agregar instructor</button>' +
+      '</div>' +
+      (profes.length
+        ? '<div class="lista">' + profes.map(itemInstructor).join('') + '</div>'
+        : '<p class="vacio">Todavía no hay instructores cargados.</p>');
+
     $('#btn-nuevo').addEventListener('click', function () {
-      var n = $('#lista').children.length;
-      $('#lista').insertAdjacentHTML('beforeend', fichaInstructor({ orden: (n + 1) * 10, activo: true }));
-      window.scrollTo(0, document.body.scrollHeight);
+      estado.editando = 'nuevo';
+      abrir('instructores');
     });
+  }
+
+  function itemInstructor(p) {
+    return '<div class="item' + (p.activo === false ? ' inactivo' : '') + '" data-id="' + esc(p.id) + '" data-tabla="instructores">' +
+      '<img class="item-img" src="' + esc(urlImagen(p.img)) + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' +
+      '<div class="item-txt">' +
+        '<div class="item-nombre">' + esc(p.nombre) +
+          (p.activo === false ? '<span class="etiqueta-oculto">oculto</span>' : '') + '</div>' +
+        '<div class="item-meta">' + esc(p.ensena || 'sin especificar') + ' · orden ' + (p.orden || 0) + '</div>' +
+      '</div>' +
+      '<div class="item-botones">' +
+        '<button class="btn fantasma chico" data-editar>Editar</button>' +
+        '<button class="btn peligro chico" data-borrar-item>Eliminar</button>' +
+      '</div>' +
+    '</div>';
   }
 
   function fichaInstructor(p) {
@@ -549,8 +694,9 @@
       campoImagen('Foto', p.img, 'img') +
       '<label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;font-family:Poppins,sans-serif;color:var(--texto)">' +
         '<input type="checkbox" data-campo="activo"' + (p.activo !== false ? ' checked' : '') + '> Visible en el sitio</label>' +
-      '<div class="acciones"><button class="btn" data-guardar>Guardar</button>' +
-      '<button class="btn peligro" data-borrar>Eliminar</button></div>' +
+      '<div class="acciones"><button class="btn" data-guardar>' +
+        (p.id ? 'Guardar cambios' : 'Crear instructor') + '</button>' +
+      '<button class="btn fantasma" data-cancelar>Cancelar</button></div>' +
     '</section>';
   }
 
@@ -631,6 +777,8 @@
         var f = await guardarFila(tabla, o);
         ficha.dataset.id = f.id;
         aviso('Guardado.', 'ok');
+        // los que tienen listado vuelven a él; los que se editan en bloque, no
+        if (estado.seccion === 'instructores') { estado.editando = null; abrir('instructores'); }
       } catch (e) { fallo(e, 'Guardando'); } finally { ocupado(btn, false); }
       return;
     }
@@ -652,7 +800,34 @@
       return;
     }
 
-    if (btn.hasAttribute('data-cancelar')) { ficha.remove(); return; }
+    // abrir el detalle desde el listado
+    if (btn.hasAttribute('data-editar')) {
+      estado.editando = ficha.dataset.id;
+      abrir(estado.seccion);
+      return;
+    }
+
+    // eliminar desde el listado
+    if (btn.hasAttribute('data-borrar-item')) {
+      var nombreItem = ($('.item-nombre', ficha).textContent || '').replace(/oculta|oculto/i, '').trim();
+      var ok = await confirmar('Eliminar ' + nombreItem,
+        'Se va a borrar de la base y deja de verse en el sitio. No se puede deshacer.');
+      if (!ok) return;
+      try {
+        await borrarFila(ficha.dataset.tabla, ficha.dataset.id);
+        aviso(nombreItem + ' eliminado.', 'ok');
+        abrir(estado.seccion);
+      } catch (e) { fallo(e, 'Eliminando'); }
+      return;
+    }
+
+    if (btn.hasAttribute('data-cancelar')) {
+      if (estado.seccion === 'disciplinas' || estado.seccion === 'instructores') {
+        estado.editando = null;
+        abrir(estado.seccion);
+      } else { ficha.remove(); }
+      return;
+    }
     if (btn.hasAttribute('data-quitar')) {
       var id = ficha.dataset.id;
       ficha.remove();
@@ -663,7 +838,9 @@
     if (btn.hasAttribute('data-borrar')) {
       var tablaB = ficha.dataset.tabla || 'disciplinas';
       var nombre = ($('.ficha-titulo', ficha) || {}).textContent || 'este elemento';
-      if (!confirm('¿Eliminar ' + nombre + '? No se puede deshacer.')) return;
+      var confirmado = await confirmar('Eliminar ' + nombre,
+        'Se va a borrar de la base y deja de verse en el sitio. No se puede deshacer.');
+      if (!confirmado) return;
       try {
         if (ficha.dataset.id) await borrarFila(tablaB, ficha.dataset.id);
         ficha.remove();
