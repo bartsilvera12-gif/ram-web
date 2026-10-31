@@ -28,14 +28,15 @@
     tabla('beneficios', activos),
     tabla('instructores', activos),
     tabla('ajustes', '?select=*'),
-    tabla('disciplina_instructores', '?select=*&order=orden.asc')
+    tabla('disciplina_instructores', '?select=*&order=orden.asc'),
+    tabla('eventos', '?select=*&activo=is.true&order=fecha.asc.nullslast,orden.asc')
   ]).then(function (r) {
     var aj = {};
     (r[5] || []).forEach(function (a) { aj[a.clave] = a.valor; });
     window.RAM_DATOS = {
       disciplinas: r[0] || [], horarios: r[1] || [], galeria: r[2] || [],
       beneficios: r[3] || [], instructores: r[4] || [], ajustes: aj,
-      vinculos: r[6] || []
+      vinculos: r[6] || [], eventos: r[7] || []
     };
     window.dispatchEvent(new CustomEvent('ram:datos'));
   });

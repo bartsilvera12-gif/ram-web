@@ -133,11 +133,27 @@ create table if not exists ram.ajustes (
   actualizado_en timestamptz not null default now()
 );
 
+-- Actividades / eventos: afiche, descripción, fecha y horario. La reserva se
+-- hace por WhatsApp desde la página pública, así que acá no se guardan reservas.
+create table if not exists ram.eventos (
+  id             uuid primary key default gen_random_uuid(),
+  orden          integer not null default 0,
+  titulo         text not null,
+  descripcion    text not null default '',
+  flyer          text not null default '',   -- afiche del evento (imagen)
+  fecha          date,                        -- día del evento
+  hora           text not null default '',    -- ej: «19:00 – 21:00»
+  lugar          text not null default '',    -- opcional
+  activo         boolean not null default true,
+  creado_en      timestamptz not null default now(),
+  actualizado_en timestamptz not null default now()
+);
+
 -- Triggers de actualizado_en
 do $blk$
 declare t text;
 begin
-  foreach t in array array['disciplinas','instructores','horarios','galeria','beneficios','ajustes']
+  foreach t in array array['disciplinas','instructores','horarios','galeria','beneficios','ajustes','eventos']
   loop
     execute format(
       'drop trigger if exists tg_%1$s_actualizado on ram.%1$s;', t);
@@ -152,6 +168,7 @@ create index if not exists ix_instructores_orden on ram.instructores (orden) whe
 create index if not exists ix_horarios_orden     on ram.horarios (orden)     where activo;
 create index if not exists ix_galeria_orden      on ram.galeria (orden)      where activo;
 create index if not exists ix_galeria_destacada  on ram.galeria (destacada)  where activo and destacada;
+create index if not exists ix_eventos_fecha      on ram.eventos (fecha)      where activo;
 
 -- ----------------------------------------------------------------------------
 -- Permisos y RLS
@@ -171,7 +188,7 @@ do $blk$
 declare t text;
 begin
   foreach t in array array['disciplinas','instructores','disciplina_instructores',
-                           'horarios','galeria','beneficios','ajustes']
+                           'horarios','galeria','beneficios','ajustes','eventos']
   loop
     execute format('alter table ram.%I enable row level security;', t);
     execute format('drop policy if exists p_%1$s_leer on ram.%1$s;', t);

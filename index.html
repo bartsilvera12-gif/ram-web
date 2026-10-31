@@ -33,14 +33,15 @@
     tabla('beneficios', activos),
     tabla('instructores', activos),
     tabla('ajustes', '?select=*'),
-    tabla('disciplina_instructores', '?select=*&order=orden.asc')
+    tabla('disciplina_instructores', '?select=*&order=orden.asc'),
+    tabla('eventos', '?select=*&activo=is.true&order=fecha.asc.nullslast,orden.asc')
   ]).then(function (r) {
     var aj = {};
     (r[5] || []).forEach(function (a) { aj[a.clave] = a.valor; });
     window.RAM_DATOS = {
       disciplinas: r[0] || [], horarios: r[1] || [], galeria: r[2] || [],
       beneficios: r[3] || [], instructores: r[4] || [], ajustes: aj,
-      vinculos: r[6] || []
+      vinculos: r[6] || [], eventos: r[7] || []
     };
     window.dispatchEvent(new CustomEvent('ram:datos'));
   });
@@ -475,6 +476,7 @@
       <a href="#nosotros" onClick="{{ goNosotros }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Nosotros</a>
       <a href="#disciplinas" onClick="{{ goDisciplinas }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Disciplinas</a>
       <a href="#horarios" onClick="{{ goHorarios }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Horarios</a>
+      <a href="#actividades" onClick="{{ goActividades }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Actividades</a>
       <a href="#galeria" onClick="{{ goGaleria }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Galería</a>
       <a href="#instructores" onClick="{{ goInstructores }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Instructores</a>
       <a href="#contacto" onClick="{{ goContacto }}" style="font-size:clamp(10px,.82vw,12px);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap">Contacto</a>
@@ -723,6 +725,51 @@
         </button>
       </sc-for>
       </div>
+    </div>
+  </section>
+
+  </sc-if>
+  <sc-if value="{{ pActividades }}" hint-placeholder-val="{{ false }}">
+  <section id="actividades" data-screen-label="Actividades" style="padding:clamp(110px,12vw,170px) 28px clamp(80px,9vw,140px);background:#0A0A0A">
+    <div style="max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;margin-bottom:clamp(28px,3.5vw,48px)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Actividades</span>
+        <h2 style="margin:18px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(32px,4vw,60px);line-height:.95;letter-spacing:-.02em;text-transform:uppercase">Seminarios y eventos</h2>
+        <p style="margin:18px 0 0;max-width:52ch;font-size:16px;line-height:1.6;color:#BFC3C7">Seminarios, graduaciones y actividades especiales de la academia. Reservá tu lugar por WhatsApp y te confirmamos el cupo.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:clamp(18px,2vw,28px)">
+      <sc-for list="{{ eventos }}" as="ev" hint-placeholder-count="3">
+        <article data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .9s ease;display:flex;flex-direction:column;background:#121212;border:1px solid rgba(191,195,199,.14)" style-hover="border-color:rgba(241,6,0,.5)">
+          <div style="position:relative;aspect-ratio:3/4;overflow:hidden;background:#0A0A0A;display:flex;align-items:center;justify-content:center">
+            <span style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(36px,5vw,52px);letter-spacing:.12em;text-transform:uppercase;color:rgba(241,6,0,.22)">RAM</span>
+            <img src="{{ ev.flyer }}" alt="{{ ev.titulo }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.05)" onerror="this.style.display='none'" />
+            <div style="position:absolute;top:0;left:0;background:#F10600;color:#fff;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">{{ ev.fechaCorta }}</div>
+          </div>
+          <div style="padding:24px 24px 26px;display:flex;flex-direction:column;flex:1">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:22px;line-height:1.1;text-transform:uppercase">{{ ev.titulo }}</h3>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;color:#BFC3C7">
+              <span>📅 {{ ev.fechaTxt }}</span>
+              <span>🕒 {{ ev.hora }}</span>
+              <span>📍 {{ ev.lugar }}</span>
+            </div>
+            <p style="margin:16px 0 0;font-size:15px;line-height:1.65;color:#BFC3C7;white-space:pre-line">{{ ev.descripcion }}</p>
+            <a href="{{ ev.reservarUrl }}" target="_blank" rel="noopener" style="margin-top:22px;align-self:flex-start;display:inline-flex;align-items:center;gap:9px;padding:14px 24px;background:#25D366;color:#0A0A0A;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700" style-hover="background:#1FB255;color:#0A0A0A">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.82 9.82 0 001.517 5.248l-.999 3.648 3.971-1.303zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.017-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              Reservar por WhatsApp
+            </a>
+          </div>
+        </article>
+      </sc-for>
+      </div>
+
+      <sc-if value="{{ sinEventos }}" hint-placeholder-val="{{ true }}">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;border:1px solid rgba(191,195,199,.16);padding:clamp(36px,5vw,64px) 28px;text-align:center">
+        <p style="margin:0;font-size:18px;line-height:1.6;color:#F5F5F5">Por ahora no hay actividades programadas.</p>
+        <p style="margin:12px 0 0;font-size:15px;line-height:1.6;color:#BFC3C7">Escribinos por WhatsApp y te avisamos del próximo seminario o evento.</p>
+        <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="display:inline-block;margin-top:22px;padding:14px 28px;background:#F10600;color:#fff;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700" style-hover="background:#A30000;color:#fff">Escribir por WhatsApp</a>
+      </div>
+      </sc-if>
     </div>
   </section>
 
@@ -1017,6 +1064,27 @@ class Component extends DCLogic {
     v = String(v == null ? '' : v);
     if (/^https?:\/\//i.test(v)) return v;
     return v.split('/').map(encodeURIComponent).join('/');
+  }
+  // Fecha de un evento ('YYYY-MM-DD') a texto en castellano. Se arma a mano para
+  // no depender de la zona horaria del navegador (new Date('YYYY-MM-DD') es UTC).
+  static DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  static MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  static fechaPartes(v) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || ''));
+    if (!m) return null;
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return { a: +m[1], mes: +m[2] - 1, dia: +m[3], dow: d.getUTCDay() };
+  }
+  static fechaLarga(v) {
+    const p = Component.fechaPartes(v);
+    if (!p) return 'Fecha a confirmar';
+    return Component.DIAS[p.dow] + ' ' + p.dia + ' de ' + Component.MESES[p.mes] + ' de ' + p.a;
+  }
+  static fechaCorta(v) {
+    const p = Component.fechaPartes(v);
+    if (!p) return 'Próximamente';
+    return p.dia + ' ' + Component.MESES[p.mes].slice(0, 3).toUpperCase();
   }
 
   go(page) {
@@ -1334,6 +1402,7 @@ class Component extends DCLogic {
       pContacto: p === 'contacto',
       pPrivacidad: p === 'privacidad',
       pDisciplina: p === 'disciplina',
+      pActividades: p === 'actividades',
       disciplinas: this.discs().map((d) => ({
         ...d,
         img: Component.ruta(d.img),
@@ -1351,6 +1420,7 @@ class Component extends DCLogic {
       goDisciplinas: this.goAnchor('disciplinas'),
       goHorarios: this.goAnchor('horarios'),
       goGaleria: this.go('galeria'),
+      goActividades: this.go('actividades'),
       goInstructores: this.go('instructores'),
       goContacto: this.go('contacto'),
       goPrivacidad: this.go('privacidad'),
@@ -1383,6 +1453,26 @@ class Component extends DCLogic {
           ? g.map((x) => ({ src: Component.ruta(x.img), alt: x.alt || 'Entrenamiento RAM' }))
           : Component.DESTACADAS.map((x) => ({ src: 'uploads/' + encodeURIComponent(x[0]), alt: x[1] }));
       })(),
+      eventos: (() => {
+        const d = this.D();
+        const l = (d && d.eventos) ? d.eventos : [];
+        return l.map((e) => {
+          const reserva = 'Hola RAM Martial Arts! Quiero reservar mi lugar en: ' +
+            (e.titulo || 'la actividad') +
+            (e.fecha ? ' (' + Component.fechaLarga(e.fecha) + ').' : '.');
+          return {
+            titulo: e.titulo || '',
+            descripcion: e.descripcion || '',
+            flyer: Component.ruta(e.flyer),
+            hora: e.hora || 'Horario a confirmar',
+            lugar: e.lugar || 'RAM Martial Arts',
+            fechaTxt: Component.fechaLarga(e.fecha),
+            fechaCorta: Component.fechaCorta(e.fecha),
+            reservarUrl: 'https://wa.me/' + num + '?text=' + encodeURIComponent(reserva)
+          };
+        });
+      })(),
+      sinEventos: !((this.D() && this.D().eventos) || []).length,
       heroImg: Component.ruta(this.aj('hero_img', 'uploads/_MG_7132 (1).JPG.jpeg')),
       porqueKicker: this.aj('porque_kicker', 'Por qu\u00e9 RAM'),
       porqueTitulo: this.aj('porque_titulo', 'Lo que te llev\u00e1s del tatami'),

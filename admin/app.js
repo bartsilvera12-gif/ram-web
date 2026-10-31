@@ -10,7 +10,7 @@
   var estado = { seccion: 'disciplinas', editando: null, instructores: [], disciplinas: [] };
 
   // Secciones que muestran listado y abren un detalle al editar
-  var CON_LISTADO = ['disciplinas', 'instructores', 'horarios', 'galeria'];
+  var CON_LISTADO = ['disciplinas', 'instructores', 'horarios', 'galeria', 'eventos'];
 
   /* ---------------------------------- utilidades --------------------------- */
 
@@ -209,6 +209,7 @@
   var SECCIONES = [
     { id: 'disciplinas',  nombre: 'Disciplinas' },
     { id: 'horarios',     nombre: 'Horarios' },
+    { id: 'eventos',      nombre: 'Actividades' },
     { id: 'porque',       nombre: 'Por qué RAM' },
     { id: 'galeria',      nombre: 'Galería' },
     { id: 'instructores', nombre: 'Instructores' },
@@ -235,7 +236,8 @@
     try {
       await ({
         disciplinas: vistaDisciplinas, horarios: vistaHorarios, porque: vistaPorque,
-        galeria: vistaGaleria, instructores: vistaInstructores, ajustes: vistaAjustes
+        galeria: vistaGaleria, instructores: vistaInstructores, ajustes: vistaAjustes,
+        eventos: vistaActividades
       })[id]();
     } catch (e) {
       fallo(e, 'Cargando ' + id);
@@ -331,7 +333,9 @@
     var o = {};
     ficha.querySelectorAll('[data-campo]').forEach(function (el) {
       o[el.dataset.campo] = el.type === 'checkbox' ? el.checked
-        : (el.type === 'number' ? (parseInt(el.value, 10) || 0) : el.value.trim());
+        : el.type === 'number' ? (parseInt(el.value, 10) || 0)
+        : el.type === 'date' ? (el.value || null)
+        : el.value.trim();
     });
     return o;
   }
@@ -560,6 +564,88 @@
         '<input type="checkbox" data-campo="activo"' + (h.activo !== false ? ' checked' : '') + '> Visible en el sitio</label>' +
       '<div class="acciones">' +
         '<button class="btn" data-guardar>' + (h.id ? 'Guardar cambios' : 'Crear clase') + '</button>' +
+        '<button class="btn fantasma" data-cancelar>Cancelar</button>' +
+      '</div>' +
+    '</section>';
+  }
+
+  /* ---------------------------------- ACTIVIDADES -------------------------- */
+
+  async function vistaActividades() {
+    var filas = await traer('eventos', 'fecha');
+
+    if (estado.editando) {
+      var ev = estado.editando === 'nuevo'
+        ? { orden: (filas.length + 1) * 10, activo: true }
+        : filas.find(function (x) { return x.id === estado.editando; });
+      if (!ev) { estado.editando = null; return vistaActividades(); }
+      $('#vista').innerHTML =
+        botonVolver() +
+        cabecera(estado.editando === 'nuevo' ? 'Nueva actividad' : (ev.titulo || 'Actividad'),
+          'Seminarios, graduaciones y eventos. Las reservas llegan por WhatsApp.') +
+        fichaEvento(ev);
+      conectarVolver();
+      return;
+    }
+
+    $('#vista').innerHTML =
+      cabecera('Actividades', 'Tocá <strong>Editar</strong> para cambiar una actividad.') +
+      '<div class="barra-acciones">' +
+        '<span class="ficha-meta">' + filas.length + ' actividad(es)</span>' +
+        '<button class="btn" id="btn-nuevo">+ Agregar actividad</button>' +
+      '</div>' +
+      (filas.length
+        ? '<div class="lista">' + filas.map(itemEvento).join('') + '</div>'
+        : '<p class="vacio">Todavía no hay actividades cargadas.</p>');
+
+    $('#btn-nuevo').addEventListener('click', function () {
+      estado.editando = 'nuevo';
+      abrir('eventos');
+    });
+  }
+
+  function fechaLegible(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || ''));
+    if (!m) return 'sin fecha';
+    return m[3] + '/' + m[2] + '/' + m[1];
+  }
+
+  function itemEvento(ev) {
+    var detalle = [fechaLegible(ev.fecha), ev.hora, ev.lugar].filter(Boolean).join(' · ');
+    return '<div class="item' + (ev.activo === false ? ' inactivo' : '') + '" data-id="' + esc(ev.id) + '" data-tabla="eventos">' +
+      '<div class="item-txt">' +
+        '<div class="item-nombre">' + esc(ev.titulo || '(sin título)') +
+          (ev.activo === false ? '<span class="etiqueta-oculto">oculta</span>' : '') + '</div>' +
+        '<div class="item-meta">' + esc(detalle || 'sin datos') + '</div>' +
+      '</div>' +
+      '<div class="item-botones">' +
+        '<button class="btn fantasma chico" data-editar>Editar</button>' +
+        '<button class="btn peligro chico" data-borrar-item>Eliminar</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function fichaEvento(ev) {
+    return '<section class="ficha" data-id="' + esc(ev.id || '') + '" data-tabla="eventos">' +
+      '<label>Título</label><input type="text" data-campo="titulo" value="' + esc(ev.titulo || '') + '">' +
+      '<p class="ayuda">Ej: «Seminario de guardia cerrada».</p>' +
+      campoImagen('Afiche / flyer', ev.flyer, 'flyer') +
+      '<div class="fila">' +
+        '<div><label>Fecha</label><input type="date" data-campo="fecha" value="' + esc((ev.fecha || '').slice(0, 10)) + '"></div>' +
+        '<div><label>Hora</label><input type="text" data-campo="hora" value="' + esc(ev.hora || '') + '">' +
+          '<p class="ayuda">Ej: «19:00 – 21:00».</p></div>' +
+      '</div>' +
+      '<div class="fila">' +
+        '<div><label>Lugar</label><input type="text" data-campo="lugar" value="' + esc(ev.lugar || '') + '">' +
+          '<p class="ayuda">Opcional. Ej: «Sede RAM, Villa Morra».</p></div>' +
+        '<div><label>Orden</label><input type="number" data-campo="orden" value="' + (ev.orden || 0) + '">' +
+          '<p class="ayuda">Desempata cuando dos actividades son el mismo día.</p></div>' +
+      '</div>' +
+      '<label>Descripción</label><textarea data-campo="descripcion" style="min-height:110px">' + esc(ev.descripcion || '') + '</textarea>' +
+      '<label style="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-family:Poppins,sans-serif;color:var(--texto)">' +
+        '<input type="checkbox" data-campo="activo"' + (ev.activo !== false ? ' checked' : '') + '> Visible en el sitio</label>' +
+      '<div class="acciones">' +
+        '<button class="btn" data-guardar>' + (ev.id ? 'Guardar cambios' : 'Crear actividad') + '</button>' +
         '<button class="btn fantasma" data-cancelar>Cancelar</button>' +
       '</div>' +
     '</section>';

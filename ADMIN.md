@@ -72,6 +72,7 @@ esconderla. Hacé commit y push, y Vercel redeploya.
 |---|---|
 | **Disciplinas** | Imagen y descripción corta de la tarjeta, descripción larga, qué se entrena, para quién es, qué llevar, y qué instructores aparecen en cada una |
 | **Horarios** | La tabla completa: agregar, editar, reordenar y borrar filas |
+| **Actividades** | Seminarios y eventos: afiche, título, descripción, fecha, hora y lugar. Cada uno sale en la página pública con un botón **Reservar por WhatsApp** |
 | **Por qué RAM** | Antetítulo, título, imagen y los seis bloques de texto |
 | **Galería** | Subir fotos, marcar las **destacadas** (las 4 del inicio) y ordenar el resto |
 | **Instructores** | Nombre, qué enseña, descripción y foto |
