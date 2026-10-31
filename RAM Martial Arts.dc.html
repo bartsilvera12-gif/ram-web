@@ -361,6 +361,40 @@
   </section>
 
   </sc-if>
+  <sc-if value="{{ pInicioConEventos }}" hint-placeholder-val="{{ false }}">
+  <section data-screen-label="Próximas actividades" style="padding:clamp(70px,8vw,120px) 28px;background:#121212">
+    <div style="max-width:1320px;margin:0 auto">
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:clamp(28px,3.5vw,48px)">
+        <div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F10600">Próximas actividades</span>
+          <h2 style="margin:16px 0 0;font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(28px,3.4vw,52px);line-height:.98;letter-spacing:-.02em;text-transform:uppercase">No te pierdas lo que viene</h2>
+        </div>
+        <a href="#actividades" onClick="{{ goActividades }}" style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#F10600;border-bottom:1px solid rgba(241,6,0,.4);padding-bottom:4px" style-hover="color:#F5F5F5;border-color:#F5F5F5">Ver todas →</a>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:clamp(18px,2vw,28px)">
+      <sc-for list="{{ eventosPreview }}" as="ev" hint-placeholder-count="3">
+        <button type="button" onClick="{{ goActividades }}" data-reveal style="opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .9s ease;display:flex;flex-direction:column;background:#0A0A0A;border:1px solid rgba(191,195,199,.14);text-align:left;cursor:pointer;color:#F5F5F5;font-family:inherit;padding:0" style-hover="border-color:rgba(241,6,0,.5)">
+          <div style="position:relative;aspect-ratio:3/4;overflow:hidden;background:#121212;display:flex;align-items:center;justify-content:center">
+            <span style="font-family:Poppins,sans-serif;font-weight:800;font-size:clamp(36px,5vw,52px);letter-spacing:.12em;text-transform:uppercase;color:rgba(241,6,0,.22)">RAM</span>
+            <img src="{{ ev.flyer }}" alt="{{ ev.titulo }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.05)" onerror="this.style.display='none'" />
+            <div style="position:absolute;top:0;left:0;background:#F10600;color:#fff;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">{{ ev.fechaCorta }}</div>
+          </div>
+          <div style="padding:22px 22px 24px;display:flex;flex-direction:column;flex:1">
+            <h3 style="margin:0;font-family:Poppins,sans-serif;font-weight:800;font-size:20px;line-height:1.1;text-transform:uppercase">{{ ev.titulo }}</h3>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;color:#BFC3C7">
+              <span>📅 {{ ev.fechaTxt }}</span>
+              <span>🕒 {{ ev.hora }}</span>
+            </div>
+            <div style="margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#F10600">Ver y reservar →</div>
+          </div>
+        </button>
+      </sc-for>
+      </div>
+    </div>
+  </section>
+
+  </sc-if>
   <sc-if value="{{ pNosotros }}" hint-placeholder-val="{{ true }}">
   <section id="nosotros" data-screen-label="Sobre RAM" style="position:relative;padding:clamp(80px,9vw,140px) 28px;background:#0A0A0A">
     <div data-ram-grid="split2" style="max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:clamp(32px,5vw,80px);align-items:center">
@@ -1210,6 +1244,25 @@ class Component extends DCLogic {
     const i = this.state.lb;
     const shots = this.fotos();
     const cur = shots[i] || shots[0] || ['', ''];
+    const eventosList = (() => {
+      const d = this.D();
+      const l = (d && d.eventos) ? d.eventos : [];
+      return l.map((e) => {
+        const reserva = 'Hola RAM Martial Arts! Quiero reservar mi lugar en: ' +
+          (e.titulo || 'la actividad') +
+          (e.fecha ? ' (' + Component.fechaLarga(e.fecha) + ').' : '.');
+        return {
+          titulo: e.titulo || '',
+          descripcion: e.descripcion || '',
+          flyer: Component.ruta(e.flyer),
+          hora: e.hora || 'Horario a confirmar',
+          lugar: e.lugar || 'RAM Martial Arts',
+          fechaTxt: Component.fechaLarga(e.fecha),
+          fechaCorta: Component.fechaCorta(e.fecha),
+          reservarUrl: 'https://wa.me/' + num + '?text=' + encodeURIComponent(reserva)
+        };
+      });
+    })();
     return {
       gallery: shots.map((sh, idx) => ({
         src: sh[0],
@@ -1283,26 +1336,10 @@ class Component extends DCLogic {
           ? g.map((x) => ({ src: Component.ruta(x.img), alt: x.alt || 'Entrenamiento RAM' }))
           : Component.DESTACADAS.map((x) => ({ src: 'uploads/' + encodeURIComponent(x[0]), alt: x[1] }));
       })(),
-      eventos: (() => {
-        const d = this.D();
-        const l = (d && d.eventos) ? d.eventos : [];
-        return l.map((e) => {
-          const reserva = 'Hola RAM Martial Arts! Quiero reservar mi lugar en: ' +
-            (e.titulo || 'la actividad') +
-            (e.fecha ? ' (' + Component.fechaLarga(e.fecha) + ').' : '.');
-          return {
-            titulo: e.titulo || '',
-            descripcion: e.descripcion || '',
-            flyer: Component.ruta(e.flyer),
-            hora: e.hora || 'Horario a confirmar',
-            lugar: e.lugar || 'RAM Martial Arts',
-            fechaTxt: Component.fechaLarga(e.fecha),
-            fechaCorta: Component.fechaCorta(e.fecha),
-            reservarUrl: 'https://wa.me/' + num + '?text=' + encodeURIComponent(reserva)
-          };
-        });
-      })(),
-      sinEventos: !((this.D() && this.D().eventos) || []).length,
+      eventos: eventosList,
+      eventosPreview: eventosList.slice(0, 3),
+      sinEventos: !eventosList.length,
+      pInicioConEventos: p === 'inicio' && eventosList.length > 0,
       heroImg: Component.ruta(this.aj('hero_img', 'uploads/_MG_7132 (1).JPG.jpeg')),
       porqueKicker: this.aj('porque_kicker', 'Por qu\u00e9 RAM'),
       porqueTitulo: this.aj('porque_titulo', 'Lo que te llev\u00e1s del tatami'),
